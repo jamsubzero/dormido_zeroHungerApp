@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">FoodLens</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">Team CHMSC</string>
+    <string name="nav_header_subtitle">teamCHMSC@gmail.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">Settings</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="need_message">Display list of need</string>
+    <string name="have_message">Display list of supply</string>
+    <string name="waste_message">Display list of wastes</string>
+    <string name="title_activity_maps">Map</string>
+</resources>
