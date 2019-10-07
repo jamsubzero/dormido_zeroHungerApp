@@ -141,7 +141,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
                     public void run() {
                         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
                        // mMap.addMarker(new MarkerOptions().position(latLng).title("Current Looation"));
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));          // UI code goes here
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,18));          // UI code goes here
                     }
                 });
 
