@@ -121,7 +121,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
+        mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
      //   mMap.getUiSettings().setZoomControlsEnabled(true);
 //        mMap.getUiSettings().setIndoorLevelPickerEnabled(true);
@@ -139,9 +139,11 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
                 MapFragment.this.getActivity().
                 runOnUiThread(new Runnable(){
                     public void run() {
+
                         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
                        // mMap.addMarker(new MarkerOptions().position(latLng).title("Current Looation"));
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,18));          // UI code goes here
+                        mMap.isMyLocationEnabled();
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,12));          // UI code goes here
                     }
                 });
 

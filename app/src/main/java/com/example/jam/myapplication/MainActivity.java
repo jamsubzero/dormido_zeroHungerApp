@@ -172,23 +172,16 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_map) {
-
             goto_map();
-
         } else if (id == R.id.nav_needs) {
-
             goto_need();
-
         } else if (id == R.id.nav_have) {
-
             goto_have();
-
         } else if (id == R.id.nav_reports) {
             goto_waste();
-        }
-
-
-          else if (id == R.id.nav_tipid) {
+        } else if(id == R.id.nav_login){
+            goto_login();
+        } else if (id == R.id.nav_tipid) {
 
         }
 
@@ -196,8 +189,6 @@ public class MainActivity extends AppCompatActivity
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
-
-
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void showAddNeedsHaveDialog(final int needOrHave){
@@ -540,7 +531,7 @@ public class MainActivity extends AppCompatActivity
         MapFragment mapFragment = new MapFragment();
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.frame, mapFragment).commit();
-
+        fab.show();
         fab.setImageResource(R.drawable.baseline_search_24);
         //fab.setVisibility(View.INVISIBLE);
     }
@@ -552,7 +543,7 @@ public class MainActivity extends AppCompatActivity
         //----
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.frame, needFragment).commit();
-
+        fab.show();
         fab.setImageResource(R.drawable.baseline_add_24);
       //  fab.setVisibility(View.VISIBLE);
     }
@@ -564,6 +555,7 @@ public class MainActivity extends AppCompatActivity
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.frame, haveFragment).commit();
        // fab.setVisibility(View.VISIBLE);
+        fab.show();
         fab.setImageResource(R.drawable.baseline_add_24);
 
     }
@@ -578,6 +570,15 @@ public class MainActivity extends AppCompatActivity
         fab.setImageResource(R.drawable.baseline_add_24);
        // fab.setVisibility(View.VISIBLE);
     }
+
+    private void goto_login(){
+        SELECTED_NAV = R.id.nav_login;
+        LoginFragment loginFragment = new LoginFragment();
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction().replace(R.id.frame, loginFragment).commit();
+        fab.hide();
+    }
+
     //====================
 
     private class AsyncLogin extends AsyncTask<String, String, String>

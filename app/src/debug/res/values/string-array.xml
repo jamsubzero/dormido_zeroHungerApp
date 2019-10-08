@@ -30,8 +30,6 @@
 
     <string-array name="food_type">
         <item>Select Food Type</item>
-        <item>Meat</item>
-        <item>Seafood</item>
         <item>Grain</item>
         <item>Poultry</item>
         <item>Fruit</item>
@@ -42,7 +40,12 @@
         <item>Select Report Type</item>
         <item>Need</item>
         <item>Supply</item>
-        <item>Waste</item>
+    </string-array>
+
+    <string-array name="user_type">
+        <item>Select User Type</item>
+        <item>Farmer</item>
+        <item>Buyer</item>
     </string-array>
 
 </resources>
