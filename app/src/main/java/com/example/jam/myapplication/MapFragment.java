@@ -22,6 +22,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -143,6 +145,17 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
                         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
                        // mMap.addMarker(new MarkerOptions().position(latLng).title("Current Looation"));
                         mMap.isMyLocationEnabled();
+
+                        mMap.addMarker(new MarkerOptions().position(new LatLng(10.175661F,122.944741F)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.farmers)));
+                        mMap.addMarker(new MarkerOptions().position(new LatLng(10.179251F,122.943539F)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.farmers)));
+                        mMap.addMarker(new MarkerOptions().position(new LatLng(10.172493F,122.946200F)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.farmers)));
+
+                        mMap.addMarker(new MarkerOptions().position(new LatLng(10.194858, 122.861871)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.cart)));
+                        mMap.addMarker(new MarkerOptions().position(new LatLng(10.194563, 122.861055)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.cart)));
+                        mMap.addMarker(new MarkerOptions().position(new LatLng(10.194690, 122.862149)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.cart)));
+                        mMap.addMarker(new MarkerOptions().position(new LatLng(10.195070, 122.861495)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.cart)));
+                        mMap.addMarker(new MarkerOptions().position(new LatLng(10.195007, 122.861710)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.cart)));
+
                         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,12));          // UI code goes here
                     }
                 });
