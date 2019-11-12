@@ -51,7 +51,7 @@ public class SupplyFragment extends Fragment {
 //    private String mParam1;
 //    private String mParam2;
 
-    String searchUrl = "http://eresponse.tk/ZeroHunger/query.php";
+    String searchUrl = "http://zerop.ml/ZeroHunger/query.php";
     public static final int CONNECTION_TIMEOUT=10000;
     public static final int READ_TIMEOUT=15000;
 

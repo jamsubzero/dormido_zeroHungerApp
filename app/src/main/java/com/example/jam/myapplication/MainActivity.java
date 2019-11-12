@@ -34,6 +34,7 @@ import android.widget.Toast;
 
 import com.example.jam.myapplication.addneedhave.Sender;
 import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -74,8 +75,8 @@ public class MainActivity extends AppCompatActivity
     private static final float MIN_DISTANCE = 1000;
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
     //http://eresponse.tk/ZeroHunger/insertNeed.php
-    String insertUrl = "http://eresponse.tk/ZeroHunger/insertNeed.php";
-    String searchUrl = "http://eresponse.tk/ZeroHunger/query.php";
+    String insertUrl = "http://zerop.ml/ZeroHunger/insertNeed.php";
+    String searchUrl = "http://zerop.ml/ZeroHunger/query.php";
     //String searchUrl = "http://172.20.10.5/zeroHungerServer/query.php";
 
     MyLocation myLocation;
@@ -711,8 +712,12 @@ public class MainActivity extends AppCompatActivity
                     Double longi = jsonObject.getDouble("longitude");
                     latLng = new LatLng(lati, longi);
 
-                    Marker marker = mMap.addMarker(new MarkerOptions().position(latLng).title(item_name).
-                                                                    snippet(quan+" "+unit));
+                    Marker marker = mMap.addMarker(new MarkerOptions()
+                            .position(latLng)
+                            .title(item_name)
+                            .snippet(quan+" "+unit)
+                           // .icon(BitmapDescriptorFactory.fromResource(R.drawable.baseline_warning_24)) // gets the icon from the resource
+                    );
                     mapMarkers.add(marker);
 
                 }
