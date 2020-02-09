@@ -58,7 +58,6 @@ public class SupplyFragment extends Fragment {
 //    private OnFragmentInteractionListener mListener;
 
     ListView listView;
-    TextView topTitle;
     CustomMealsAdapter dataAdapter = null;
 
 
@@ -97,8 +96,6 @@ public class SupplyFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         //ImageView imageView = (ImageView) getView().findViewById(R.id.foo);
         listView = (ListView) getView().findViewById(R.id.mealList);
-        topTitle =getView().findViewById(R.id.topTitle);
-        topTitle.setText("Your Supply");
         new AsyncLogin().execute("1", "-1", "-1", "-1", "-1");// 0 for need, -1 for skip argument
        // new AsyncLogin().execute(sReportType, sSearchYear, sSearchMonth, sFoodType, sItem);
 

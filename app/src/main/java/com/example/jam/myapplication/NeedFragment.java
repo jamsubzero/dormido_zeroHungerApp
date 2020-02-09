@@ -1,6 +1,7 @@
 package com.example.jam.myapplication;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -10,6 +11,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -65,10 +67,9 @@ public class NeedFragment extends Fragment {
 //    private OnFragmentInteractionListener mListener;
 
     ListView listView;
+    Button btn;
 
     CustomMealsAdapter dataAdapter = null;
-    TextView topTitle;
-
 
     public NeedFragment() {
         // Required empty public constructor
@@ -95,18 +96,22 @@ public class NeedFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
-
-
     }
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         //ImageView imageView = (ImageView) getView().findViewById(R.id.foo);
         listView = (ListView) getView().findViewById(R.id.mealList);
-        topTitle =getView().findViewById(R.id.topTitle);
-        topTitle.setText("Your Needs");
+        btn = getView().findViewById(R.id.button2);
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent myIntent = new Intent(getActivity(), ReportActivity.class);
+                //myIntent.putExtra("key", value); //Optional parameters
+                startActivityForResult(myIntent, 1);
+
+            }
+        });
         new AsyncLogin().execute("0", "-1", "-1", "-1", "-1");// 0 for need, -1 for skip argument
        // new AsyncLogin().execute(sReportType, sSearchYear, sSearchMonth, sFoodType, sItem);
 
