@@ -60,7 +60,6 @@ public class WastageFragment extends Fragment {
     ListView listView;
 
     CustomMealsAdapter dataAdapter = null;
-    TextView topTitle;
 
 
     public WastageFragment() {
@@ -97,9 +96,6 @@ public class WastageFragment extends Fragment {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         //ImageView imageView = (ImageView) getView().findViewById(R.id.foo);
-        listView = (ListView) getView().findViewById(R.id.mealList);
-        topTitle =getView().findViewById(R.id.topTitle);
-        topTitle.setText("Your Food Wastes");
         new AsyncLogin().execute("2", "-1", "-1", "-1", "-1");// 2 for need, -1 for skip argument
        // new AsyncLogin().execute(sReportType, sSearchYear, sSearchMonth, sFoodType, sItem);
 
