@@ -74,8 +74,8 @@ public class MainActivity extends AppCompatActivity
     private static final float MIN_DISTANCE = 1000;
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
     //http://eresponse.tk/ZeroHunger/insertNeed.php
-    String insertUrl = "http://eresponse.tk/ZeroHunger/insertNeed.php";
-    String searchUrl = "http://eresponse.tk/ZeroHunger/query.php";
+    String insertUrl = "http://zerop.ml/agri/insertNeed.php";
+    String searchUrl = "http://zerop.ml/agri/query.php";
     //String searchUrl = "http://172.20.10.5/zeroHungerServer/query.php";
 
     MyLocation myLocation;
@@ -129,7 +129,9 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onPause() {
         super.onPause();
-        myLocation.cancelTimer();
+        if(myLocation != null){
+            myLocation.cancelTimer();
+        }
     }
 
     @Override
@@ -199,9 +201,9 @@ public class MainActivity extends AppCompatActivity
         final AlertDialog.Builder builder1 = new AlertDialog.Builder(MainActivity.this);
         String message = null;
         if(needOrHave == 0){ // 0 for need
-            message = "What do you need?";
+            message = "Add New Demand";
         }else if(needOrHave ==1){  // 1 for have
-            message = "What do you have?";
+            message = "Add New Supply";
         }
         builder1.setMessage(message);
         builder1.setCancelable(true);
@@ -219,17 +221,17 @@ public class MainActivity extends AppCompatActivity
                             @Override
                             public void gotLocation(Location location){
                                 Spinner type = dialogView.findViewById(R.id.foodtype);
-                                EditText item = dialogView.findViewById(R.id.item);
+                                EditText item = dialogView.findViewById(R.id.item); //decription
                                 EditText quan = dialogView.findViewById(R.id.quan);
-                                EditText unit = dialogView.findViewById(R.id.unit);
+                                Spinner unit = dialogView.findViewById(R.id.unit);
                                 Spinner year = dialogView.findViewById(R.id.year);
                                 Spinner month = dialogView.findViewById(R.id.month);
 
-                                String sUserID = "jam";
+                                String sUserID = "jam";//TODO current logged user will be taken from sharedPreferences
                                 String sType = type.getSelectedItem().toString();
                                 String sItem_name = item.getText().toString();
                                 String sQuan = quan.getText().toString();
-                                String sUnit = unit.getText().toString();
+                                String sUnit = unit.getSelectedItem().toString();
                                 String sYear = year.getSelectedItem().toString();
                                 String sMonth = month.getSelectedItem().toString();
 

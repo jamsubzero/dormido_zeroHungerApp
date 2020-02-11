@@ -120,9 +120,13 @@ public class MyLocation{
 
 
     public void cancelTimer() {
-        timer1.cancel();
-        lm.removeUpdates(locationListenerGps);
-        lm.removeUpdates(locationListenerNetwork);
+        if(timer1 !=null) {
+            timer1.cancel();
+        }
+        if(lm != null) {
+            lm.removeUpdates(locationListenerGps);
+            lm.removeUpdates(locationListenerNetwork);
+        }
     }
 
     public static abstract class LocationResult{

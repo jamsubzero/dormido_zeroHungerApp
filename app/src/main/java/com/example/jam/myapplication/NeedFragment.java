@@ -60,7 +60,7 @@ public class NeedFragment extends Fragment {
 //    private String mParam1;
 //    private String mParam2;
 
-    String searchUrl = "http://eresponse.tk/ZeroHunger/query.php";
+    String searchUrl = "http://zerop.ml/agri/query.php";
     public static final int CONNECTION_TIMEOUT=10000;
     public static final int READ_TIMEOUT=15000;
 
@@ -68,6 +68,7 @@ public class NeedFragment extends Fragment {
 
     ListView listView;
     Button btn;
+    ArrayList<NeedEntry> mealList = new ArrayList<NeedEntry>();
 
     CustomMealsAdapter dataAdapter = null;
 
@@ -261,7 +262,7 @@ public class NeedFragment extends Fragment {
             Log.i("JSON", result);
             pdLoading.dismiss();
             LatLng latLng = null;
-            ArrayList<NeedEntry> mealList = new ArrayList<NeedEntry>();
+            mealList = new ArrayList<NeedEntry>();
             try {
                 JSONArray jsonArray  = new JSONArray(result);
                 for(int index = 0; index < jsonArray.length() ; index++){
@@ -286,12 +287,10 @@ public class NeedFragment extends Fragment {
 
                     latLng = new LatLng(lati, longi);
 
-                    {NeedEntry meal = new NeedEntry(item_name+"("+quan+" "+unit+") - "+type,
+                    NeedEntry meal = new NeedEntry(item_name+"("+quan+" "+unit+") - "+type,
                             city +", "+province+", for: "+month+", "+year,false);
-                        mealList.add(meal);}
 
-
-
+                    mealList.add(meal);
 
                 }
                 dataAdapter = new CustomMealsAdapter(NeedFragment.this.getContext(),R.layout.need_info, mealList);

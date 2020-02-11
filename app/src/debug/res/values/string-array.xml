@@ -2,7 +2,6 @@
 <resources>
     <string-array name="year" >
         <item>Select year</item>
-        <item>2018</item>
         <item>2019</item>
         <item>2020</item>
         <item>2021</item>
@@ -10,6 +9,11 @@
         <item>2023</item>
         <item>2024</item>
         <item>2025</item>
+        <item>2026</item>
+        <item>2027</item>
+        <item>2028</item>
+        <item>2029</item>
+        <item>2030</item>
     </string-array>
 
     <string-array name="month" >
@@ -29,16 +33,37 @@
     </string-array>
 
     <string-array name="food_type">
-        <item>Select Food Type</item>
-        <item>Grain</item>
-        <item>Poultry</item>
-        <item>Fruit</item>
-        <item>Vegetables</item>
+        <item>Select Crop</item>
+        <item>Rice</item>
+        <item>Corn</item>
+        <item>Mango</item>
+        <item>Banana</item>
+        <item>Mango</item>
+        <item>Papaya</item>
+        <item>Onion</item>
+        <item>Tomato</item>
+        <item>Cabbage</item>
+        <item>Potato</item>
+        <item>Beans</item>
+        <item>Sweet Potato</item>
+        <item>Carrots</item>
+        <item>Eggplant</item>
+        <item>Asparagus</item>
+        <item>Pepper</item>
+        <item>Chillies</item>
+        <item>Ampalaya</item>
+        <item>Lettuce</item>
+        <item>Mushrooms</item>
+        <item>Okra</item>
+        <item>Cauliflower</item>
+        <item>Cucumber</item>
+        <item>Squash</item>
+
     </string-array>
 
     <string-array name="report_type">
         <item>Select Report Type</item>
-        <item>Need</item>
+        <item>Demand</item>
         <item>Supply</item>
     </string-array>
 
@@ -46,6 +71,10 @@
         <item>Select User Type</item>
         <item>Farmer</item>
         <item>Buyer</item>
+    </string-array>
+
+    <string-array name="unit_type">
+        <item>kg</item>
     </string-array>
 
 </resources>
