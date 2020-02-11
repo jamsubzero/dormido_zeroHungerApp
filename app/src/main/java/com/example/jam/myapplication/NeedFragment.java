@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.example.jam.myapplication.CustomAdapters.CustomMealsAdapter;
 import com.example.jam.myapplication.Pojos.NeedEntry;
+import com.example.jam.myapplication.Pojos.NeedReport;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -63,12 +64,14 @@ public class NeedFragment extends Fragment {
     String searchUrl = "http://zerop.ml/agri/query.php";
     public static final int CONNECTION_TIMEOUT=10000;
     public static final int READ_TIMEOUT=15000;
+    public static final String NEED_REPORT = "need_report";
 
 //    private OnFragmentInteractionListener mListener;
 
     ListView listView;
     Button btn;
     ArrayList<NeedEntry> mealList = new ArrayList<NeedEntry>();
+    ArrayList<NeedReport> reportList = new ArrayList<NeedReport>();
 
     CustomMealsAdapter dataAdapter = null;
 
@@ -109,6 +112,7 @@ public class NeedFragment extends Fragment {
             public void onClick(View view) {
                 Intent myIntent = new Intent(getActivity(), ReportActivity.class);
                 //myIntent.putExtra("key", value); //Optional parameters
+                myIntent.putParcelableArrayListExtra(NEED_REPORT, reportList);
                 startActivityForResult(myIntent, 1);
 
             }
@@ -290,6 +294,10 @@ public class NeedFragment extends Fragment {
                     NeedEntry meal = new NeedEntry(item_name+"("+quan+" "+unit+") - "+type,
                             city +", "+province+", for: "+month+", "+year,false);
 
+                    NeedReport needReport = new NeedReport(type, monthStringToInt(month),
+                            Integer.parseInt(year), Integer.parseInt(quan));
+                    reportList.add(needReport);
+
                     mealList.add(meal);
 
                 }
@@ -369,4 +377,34 @@ public class NeedFragment extends Fragment {
 //        // TODO: Update argument type and name
 //        void onFragmentInteraction(Uri uri);
 //    }
+
+    private int monthStringToInt(String month){
+        if (month.equalsIgnoreCase("January")){
+            return 0;
+        }else if (month.equalsIgnoreCase("February")){
+            return 1;
+        }else if (month.equalsIgnoreCase("March")){
+            return 2;
+        }else if (month.equalsIgnoreCase("April")){
+            return 3;
+        }else if (month.equalsIgnoreCase("May")){
+            return 4;
+        }else if (month.equalsIgnoreCase("June")){
+            return 5;
+        }else if (month.equalsIgnoreCase("July")){
+            return 6;
+        }else if (month.equalsIgnoreCase("August")){
+            return 7;
+        }else if (month.equalsIgnoreCase("September")){
+            return 8;
+        }else if (month.equalsIgnoreCase("October")){
+            return 9;
+        }else if (month.equalsIgnoreCase("November")){
+            return 10;
+        }else if (month.equalsIgnoreCase("December")){
+            return 11;
+        }
+
+        return -1;
+    }
 }
