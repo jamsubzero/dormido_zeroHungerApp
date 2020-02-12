@@ -291,7 +291,7 @@ public class NeedFragment extends Fragment {
 
                     latLng = new LatLng(lati, longi);
 
-                    NeedEntry meal = new NeedEntry(item_name+"("+quan+" "+unit+") - "+type,
+                    NeedEntry meal = new NeedEntry(type+"("+quan+" "+unit+")",
                             city +", "+province+", for: "+month+", "+year,false);
 
                     NeedReport needReport = new NeedReport(type, monthStringToInt(month),
