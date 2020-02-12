@@ -31,15 +31,23 @@ public class ReportActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_report);
 
-        ArrayList<NeedReport> needReportList = getIntent().getParcelableArrayListExtra(NeedFragment.NEED_REPORT);
+        final boolean IS_NEED = getIntent().getBooleanExtra("type", true);
 
         LineChart chart = findViewById(R.id.barchart);
-        chart.setDescription("Crop Demand Data");
 
-        needReportList.forEach(nr-> {
-            //Log.e("sirjom", nr.getItemName() + nr.getMonth() + nr.getQuan() + nr.getYear());
-             }
-        );
+        if(IS_NEED){
+            chart.setDescription("Crop Demand Data in kg");
+        }else{
+            chart.setDescription("Crop Supply Data in kg");
+        }
+
+        ArrayList<NeedReport> needReportList = new ArrayList<>();
+
+        if(IS_NEED) {
+            needReportList = getIntent().getParcelableArrayListExtra(NeedFragment.NEED_REPORT);
+        }else{
+            needReportList = getIntent().getParcelableArrayListExtra(SupplyFragment.SUPPLY_REPORT);
+        }
 
         List<NeedReport> allCrops = needReportList.stream()
                 .filter(distinctByKey(p -> p.getItemName()))

@@ -293,7 +293,7 @@ public class MainActivity extends AppCompatActivity
 
 
                                 // save(sUserID, sItem_name, sDesc, sLati, sLongi, sNeed_have);
-                                Sender s=new Sender(MainActivity.this,insertUrl,sUserID, sType, sItem_name, sQuan, sUnit, sYear, sMonth, sLati,
+                                Sender s=new Sender(MainActivity.this, insertUrl,sUserID, sType, sItem_name, sQuan, sUnit, sYear, sMonth, sLati,
                                         sLongi, city, province, needOrHave);
                                 s.execute();
                             }
@@ -308,8 +308,8 @@ public class MainActivity extends AppCompatActivity
 
 //                        EditText name = dialogView.findViewById(R.id.desc);
 //                        Toast.makeText(MainActivity.this, name.getText(), Toast.LENGTH_LONG).show();
-                        dialog.dismiss();
 
+                        dialog.dismiss();
                     }
                 });
 
@@ -421,7 +421,7 @@ public class MainActivity extends AppCompatActivity
 
 
                                 // save(sUserID, sItem_name, sDesc, sLati, sLongi, sNeed_have);
-                                Sender s=new Sender(MainActivity.this,insertUrl,sUserID, sType, sItem_name, sQuan, sUnit, "N/A", "N/A", sLati,
+                                Sender s=new Sender(MainActivity.this, insertUrl,sUserID, sType, sItem_name, sQuan, sUnit, "N/A", "N/A", sLati,
                                         sLongi, city, province, WASTE_FLAG);
                                 s.execute();
                             }
@@ -437,6 +437,7 @@ public class MainActivity extends AppCompatActivity
 //                        EditText name = dialogView.findViewById(R.id.desc);
 //                        Toast.makeText(MainActivity.this, name.getText(), Toast.LENGTH_LONG).show();
                         dialog.dismiss();
+
 
                     }
                 });

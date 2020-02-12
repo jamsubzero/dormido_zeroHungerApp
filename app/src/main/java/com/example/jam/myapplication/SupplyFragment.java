@@ -1,6 +1,7 @@
 package com.example.jam.myapplication;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -9,11 +10,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
 import com.example.jam.myapplication.CustomAdapters.CustomMealsAdapter;
 import com.example.jam.myapplication.Pojos.NeedEntry;
+import com.example.jam.myapplication.Pojos.NeedReport;
 import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONArray;
@@ -31,6 +34,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+
+import static com.example.jam.myapplication.NeedFragment.monthStringToInt;
 
 //
 ///**
@@ -54,10 +59,14 @@ public class SupplyFragment extends Fragment {
     String searchUrl = "http://zerop.ml/agri/query.php";
     public static final int CONNECTION_TIMEOUT=10000;
     public static final int READ_TIMEOUT=15000;
+    public static final String SUPPLY_REPORT = "supply_report";
 
 //    private OnFragmentInteractionListener mListener;
 
     ListView listView;
+    Button btn;
+    ArrayList<NeedEntry> mealList = new ArrayList<NeedEntry>();
+    ArrayList<NeedReport> reportList = new ArrayList<NeedReport>();
     CustomMealsAdapter dataAdapter = null;
 
 
@@ -96,6 +105,20 @@ public class SupplyFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         //ImageView imageView = (ImageView) getView().findViewById(R.id.foo);
         listView = (ListView) getView().findViewById(R.id.mealList);
+        btn = getView().findViewById(R.id.button2);
+        btn.setText("View Supply Report");
+        btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent myIntent = new Intent(getActivity(), ReportActivity.class);
+                //myIntent.putExtra("key", value); //Optional parameters
+                myIntent.putParcelableArrayListExtra(SUPPLY_REPORT, reportList);
+                myIntent.putExtra("type", false);
+                startActivityForResult(myIntent, 1);
+
+            }
+        });
+
         new AsyncLogin().execute("1", "-1", "-1", "-1", "-1");// 0 for need, -1 for skip argument
        // new AsyncLogin().execute(sReportType, sSearchYear, sSearchMonth, sFoodType, sItem);
 
@@ -270,10 +293,14 @@ public class SupplyFragment extends Fragment {
 
                     latLng = new LatLng(lati, longi);
 
-                    {NeedEntry meal = new NeedEntry(item_name+"("+quan+" "+unit+") - "+type,
+                    NeedEntry meal = new NeedEntry(type+"("+quan+" "+unit+")",
                             city +", "+province+", for: "+month+", "+year,false);
-                        mealList.add(meal);}
 
+                    NeedReport needReport = new NeedReport(type, monthStringToInt(month),
+                            Integer.parseInt(year), Integer.parseInt(quan));
+                    reportList.add(needReport);
+
+                    mealList.add(meal);
 
 
 

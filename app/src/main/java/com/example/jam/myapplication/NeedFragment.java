@@ -65,6 +65,7 @@ public class NeedFragment extends Fragment {
     public static final int CONNECTION_TIMEOUT=10000;
     public static final int READ_TIMEOUT=15000;
     public static final String NEED_REPORT = "need_report";
+    public static final boolean IS_NEED = true;
 
 //    private OnFragmentInteractionListener mListener;
 
@@ -107,12 +108,14 @@ public class NeedFragment extends Fragment {
         //ImageView imageView = (ImageView) getView().findViewById(R.id.foo);
         listView = (ListView) getView().findViewById(R.id.mealList);
         btn = getView().findViewById(R.id.button2);
+        btn.setText("View Demand Report");
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent myIntent = new Intent(getActivity(), ReportActivity.class);
                 //myIntent.putExtra("key", value); //Optional parameters
                 myIntent.putParcelableArrayListExtra(NEED_REPORT, reportList);
+                myIntent.putExtra("type", IS_NEED);
                 startActivityForResult(myIntent, 1);
 
             }
@@ -378,7 +381,7 @@ public class NeedFragment extends Fragment {
 //        void onFragmentInteraction(Uri uri);
 //    }
 
-    private int monthStringToInt(String month){
+    public static int monthStringToInt(String month){
         if (month.equalsIgnoreCase("January")){
             return 0;
         }else if (month.equalsIgnoreCase("February")){
