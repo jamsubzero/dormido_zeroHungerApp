@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -33,6 +34,7 @@ public class ReportActivity extends AppCompatActivity {
         ArrayList<NeedReport> needReportList = getIntent().getParcelableArrayListExtra(NeedFragment.NEED_REPORT);
 
         LineChart chart = findViewById(R.id.barchart);
+        chart.setDescription("Crop Demand Data");
 
         needReportList.forEach(nr-> {
             //Log.e("sirjom", nr.getItemName() + nr.getMonth() + nr.getQuan() + nr.getYear());
@@ -69,10 +71,10 @@ public class ReportActivity extends AppCompatActivity {
         }
 
         ArrayList dataSets = new ArrayList();
-        int colRand = 0;
+
 
         for(NeedReport report: allCrops) {
-            colRand++;
+
             ArrayList cropData = new ArrayList();
 
             HashMap<Integer, Integer> pair = allRec.get(report.getItemName());
@@ -82,11 +84,9 @@ public class ReportActivity extends AppCompatActivity {
             }
 
             LineDataSet cropDataSet = new LineDataSet(cropData, report.getItemName());
-            if(colRand % 2 == 0) {
-                cropDataSet.setColor(Color.BLUE);
-            }else {
-                cropDataSet.setColor(Color.RED);
-            }
+
+            cropDataSet.setColor(generateRandomColor());
+
             dataSets.add(cropDataSet);
         }
 
@@ -168,6 +168,14 @@ public class ReportActivity extends AppCompatActivity {
         }
 
         return all;
+    }
+
+    private int generateRandomColor(){
+        Random rand = new Random();
+        int r = rand.nextInt(255);
+        int g = rand.nextInt(255);
+        int b = rand.nextInt(255);
+        return Color.rgb(r, g, b);
     }
 
 
