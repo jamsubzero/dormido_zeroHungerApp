@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -123,6 +124,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        if(checkPermission()){
+            mMap.setMyLocationEnabled(true);
+            mMap.getUiSettings().setMyLocationButtonEnabled(true);
+        }else{
+            askPermission();
+        }
+
         mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
      //   mMap.getUiSettings().setZoomControlsEnabled(true);
@@ -165,7 +173,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
 
         MyLocation myLocation = new MyLocation(this.getActivity());
         myLocation.getLocation(locationResult);
-pd.dismiss();
+        pd.dismiss();
 //        // Add a marker in Sydney and move the camera
 //        checkLocationPermission();
 //        LocationManager locationManager = (LocationManager) this.getActivity().getSystemService(Context.LOCATION_SERVICE);
@@ -198,6 +206,22 @@ pd.dismiss();
     @Override
     public void onProviderDisabled(String provider) {
 
+    }
+
+    private boolean checkPermission() {
+        Log.d("MAP", "checkPermission()");
+        // Ask for permission if it wasn't granted yet
+        return (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED );
+    }
+    // Asks for permission
+    private void askPermission() {
+        Log.d("MAP", "askPermission()");
+        ActivityCompat.requestPermissions(
+                getActivity(),
+                new String[] { Manifest.permission.ACCESS_FINE_LOCATION },
+                MY_PERMISSIONS_REQUEST_LOCATION
+        );
     }
 
 
