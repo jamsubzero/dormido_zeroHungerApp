@@ -37,6 +37,7 @@ import android.widget.Toast;
 
 import com.example.jam.myapplication.addneedhave.Sender;
 import com.example.jam.myapplication.ui.login.LoginActivity;
+import com.example.jam.myapplication.ui.login.Logout;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -92,6 +93,7 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        SharedPreferences sharedPreferences = getSharedPreferences("user", Context.MODE_PRIVATE);
         fab = findViewById(R.id.fab);
 
         fab.setOnClickListener(new View.OnClickListener() {
@@ -102,10 +104,20 @@ public class MainActivity extends AppCompatActivity
                 if(SELECTED_NAV == R.id.nav_map) {
                     showSearchDialog();
                 }else if(SELECTED_NAV == R.id.nav_needs) {
-                    showAddNeedsHaveDialog( 0  ); // 0 for need
+                    if (sharedPreferences.getString("id","").isEmpty()){
+                        Toast.makeText(getApplicationContext(), "Please login first", Toast.LENGTH_LONG).show();
+                        goto_login();
+                    }else{
+                        showAddNeedsHaveDialog( 0  ); // 0 for need
+                    }
                 }else if(SELECTED_NAV == R.id.nav_have){
                     //TODO showAddHavesDialog()
-                    showAddNeedsHaveDialog( 1  ); // 1 for have
+                    if (sharedPreferences.getString("id","").isEmpty()){
+                        Toast.makeText(getApplicationContext(), "Please login first", Toast.LENGTH_LONG).show();
+                        goto_login();
+                    }else {
+                        showAddNeedsHaveDialog(1); // 1 for have
+                    }
                 }else if(SELECTED_NAV == R.id.nav_reports){
                     showReportWasteDialog();
                 }
@@ -123,10 +135,29 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-    myLocation = new MyLocation(MainActivity.this);
+        myLocation = new MyLocation(MainActivity.this);
 
         //---- goto need by default
         goto_map();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        SharedPreferences sharedPreferences = getSharedPreferences("user", Context.MODE_PRIVATE);
+        NavigationView navigationView = findViewById(R.id.nav_view);
+
+        Menu menu = navigationView.getMenu();
+
+        if (sharedPreferences.getString("id","").isEmpty()){
+            menu.findItem(R.id.nav_login).setVisible(true);
+            menu.findItem(R.id.nav_logout).setVisible(false);
+        }else{
+            menu.findItem(R.id.nav_login).setVisible(false);
+            menu.findItem(R.id.nav_logout).setVisible(true);
+        }
 
     }
 
@@ -189,7 +220,10 @@ public class MainActivity extends AppCompatActivity
             goto_login();
         } else if (id == R.id.nav_tipid) {
 
+        } else if (id == R.id.nav_logout) {
+            goto_logout();
         }
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
@@ -588,6 +622,10 @@ public class MainActivity extends AppCompatActivity
         this.startActivity(intent);
     }
 
+    private  void goto_logout(){
+        Intent intent = new Intent(MainActivity.this, Logout.class);
+        startActivity(intent);
+    }
     //====================
 
     private class AsyncLogin extends AsyncTask<String, String, String>

@@ -159,7 +159,6 @@ public class LoginActivity extends AppCompatActivity {
         editor.putInt("type", displayType);
 
         editor.commit();
-
         Toast.makeText(getApplicationContext(), welcome, Toast.LENGTH_LONG).show();
     }
 

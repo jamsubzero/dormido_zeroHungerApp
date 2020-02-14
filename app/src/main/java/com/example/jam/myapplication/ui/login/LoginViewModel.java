@@ -60,7 +60,7 @@ public class LoginViewModel extends ViewModel {
         }
 
         JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
-                Request.Method.GET, url, params, new Response.Listener<JSONObject>() {
+                Request.Method.POST, url, params, new Response.Listener<JSONObject>() {
 
             int status = 0;
             String message = "";
@@ -68,9 +68,13 @@ public class LoginViewModel extends ViewModel {
             @Override
             public void onResponse(JSONObject response) {
                 Log.d("onResponse", response.toString());
+                Log.d("params", params.toString());
+
                 try {
                     status = response.getInt("status");
                     message = response.getString("message");
+
+                    Log.d("Message", message);
 
                     if (status == 200){
                         JSONArray dataJson = response.getJSONArray("data");
