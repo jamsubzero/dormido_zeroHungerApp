@@ -12,8 +12,6 @@ import android.widget.Toast;
 import com.example.jam.myapplication.MainActivity;
 import com.example.jam.myapplication.R;
 
-import kotlinx.coroutines.GlobalScope;
-
 public class Logout extends AppCompatActivity {
 
     @Override

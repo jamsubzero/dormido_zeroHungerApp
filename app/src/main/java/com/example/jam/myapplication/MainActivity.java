@@ -236,6 +236,8 @@ public class MainActivity extends AppCompatActivity
         // Snackbar.make(view, "Replalckkkke now with your own action", Snackbar.LENGTH_LONG)
         //        .setAction("Action", null).show();
 
+        SharedPreferences sharedPreferences = getSharedPreferences("user", Context.MODE_PRIVATE);
+
         final AlertDialog.Builder builder1 = new AlertDialog.Builder(MainActivity.this);
         String message = null;
         if(needOrHave == 0){ // 0 for need
@@ -265,7 +267,7 @@ public class MainActivity extends AppCompatActivity
                                 Spinner year = dialogView.findViewById(R.id.year);
                                 Spinner month = dialogView.findViewById(R.id.month);
 
-                                String sUserID = "jam";//TODO current logged user will be taken from sharedPreferences
+                                String sUserID = sharedPreferences.getString("id", "");
                                 String sType = type.getSelectedItem().toString();
                                 String sItem_name = item.getText().toString();
                                 String sQuan = quan.getText().toString();

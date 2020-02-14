@@ -150,6 +150,7 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
                 runOnUiThread(new Runnable(){
                     public void run() {
 
+                        //TODO: Change from DB
                         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
                        // mMap.addMarker(new MarkerOptions().position(latLng).title("Current Looation"));
                         mMap.isMyLocationEnabled();
