@@ -20,11 +20,25 @@
             android:text="View Demand Report"
             />
 
+        <Button
+            android:id="@+id/filterBtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/submit_btn"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentLeft="true"
+            android:drawableStart="@drawable/filter"
+            android:drawableLeft="@drawable/filter"
+            android:gravity="center"
+            android:paddingLeft="120dp"
+            android:paddingRight="120dp"
+            android:text="Filter Record" />
+
         <View
             android:layout_width="match_parent"
             android:layout_height="2dp"
             android:background="@color/colorPrimaryDark"
-            android:layout_below="@+id/submit_btn"
+            android:layout_below="@+id/filterBtn"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_marginTop="4dp"

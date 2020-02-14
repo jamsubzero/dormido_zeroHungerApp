@@ -1,6 +1,8 @@
 package com.example.jam.myapplication;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -12,6 +14,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.example.jam.myapplication.CustomAdapters.CustomMealsAdapter;
 import com.example.jam.myapplication.Pojos.NeedEntry;
@@ -62,7 +66,7 @@ public class NeedFragment extends Fragment {
 //    private OnFragmentInteractionListener mListener;
 
     ListView listView;
-    Button btn;
+    Button reportBtn, filterBtn;
     ArrayList<NeedEntry> mealList = new ArrayList<NeedEntry>();
     ArrayList<NeedReport> reportList = new ArrayList<NeedReport>();
 
@@ -99,9 +103,66 @@ public class NeedFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         //ImageView imageView = (ImageView) getView().findViewById(R.id.foo);
         listView = (ListView) getView().findViewById(R.id.mealList);
-        btn = getView().findViewById(R.id.submit_btn);
-        btn.setText("View Demand Report");
-        btn.setOnClickListener(new View.OnClickListener() {
+        reportBtn = getView().findViewById(R.id.submit_btn);
+        reportBtn.setText("View Demand Report");
+        filterBtn = getView().findViewById(R.id.filterBtn);
+
+        filterBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //
+                final AlertDialog.Builder builder1 = new AlertDialog.Builder(getActivity());
+
+                builder1.setMessage("Filter Demand");
+                builder1.setCancelable(true);
+                builder1.setView(R.layout.filter_demand_layout);
+                LayoutInflater inflater = getActivity().getLayoutInflater();
+                final View dialogView = inflater.inflate(R.layout.filter_demand_layout, null);
+                builder1.setView(dialogView);
+                builder1.setPositiveButton(
+                        "Filter",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                           final Spinner filCrop =  dialogView.findViewById(R.id.filCrop);
+                           final Spinner filMonth =  dialogView.findViewById(R.id.filMonth);
+                           final Spinner filYear =  dialogView.findViewById(R.id.filYear);
+                           String sCrop = filCrop.getSelectedItem().toString();
+                           String sMonth = filMonth.getSelectedItem().toString();
+                           String sYear = filYear.getSelectedItem().toString();
+
+                           if(filCrop.getSelectedItemPosition() == 0){
+                               sCrop = "-1";
+                           }
+                           if(filMonth.getSelectedItemPosition() == 0){
+                               sMonth = "-1";
+                           }
+                           if(filYear.getSelectedItemPosition()==0){
+                               sYear = "-1";
+                           }
+
+
+                                new AsyncLogin().execute("0", sYear, sMonth, sCrop, "-1");// 0 for need, -1 for skip argument
+                                dialog.dismiss();
+                            }
+                        });
+
+                builder1.setNegativeButton(
+                        "Cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.dismiss();
+                            }
+                        });
+
+                AlertDialog alert11 = builder1.create();
+                alert11.show();
+
+                //
+            }
+        });
+
+
+        reportBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent myIntent = new Intent(getActivity(), ReportActivity.class);
@@ -161,6 +222,7 @@ public class NeedFragment extends Fragment {
             pdLoading.setMessage("\tFetching data...please wait.");
             pdLoading.setCancelable(false);
             pdLoading.show();
+
 
         }
         @Override
@@ -255,17 +317,17 @@ public class NeedFragment extends Fragment {
         @Override
         protected void onPostExecute(String result) {
 
-            //this method will be running on UI thread
-
-            //Toast.makeText(MainActivity.this, "Successfully Fetched!", Toast.LENGTH_LONG).show();
             Log.i("JSON", result);
             pdLoading.dismiss();
             LatLng latLng = null;
             mealList = new ArrayList<NeedEntry>();
+            reportList = new ArrayList<>();
             try {
+                if(!result.equals("-1")){
+
                 JSONArray jsonArray  = new JSONArray(result);
-                for(int index = 0; index < jsonArray.length() ; index++){
-                    JSONObject jsonObject  = jsonArray.getJSONObject( index );
+                for(int index = 0; index < jsonArray.length() ; index++) {
+                    JSONObject jsonObject = jsonArray.getJSONObject(index);
                     Log.i("JSON 1st ITEM", jsonObject.toString());
                     String item_name = jsonObject.getString("item_name");
                     String quan = jsonObject.getString("quan");
@@ -273,9 +335,13 @@ public class NeedFragment extends Fragment {
                     String unit = jsonObject.getString("unit");
                     int need_have = jsonObject.getInt("need_have");
                     String sNeedHaveWaste = "";
-                    if(need_have == 0){sNeedHaveWaste = "Need";}
-                    else if(need_have == 1){sNeedHaveWaste = "Supply";}
-                    else if(need_have == 2){sNeedHaveWaste = "Waste";}
+                    if (need_have == 0) {
+                        sNeedHaveWaste = "Need";
+                    } else if (need_have == 1) {
+                        sNeedHaveWaste = "Supply";
+                    } else if (need_have == 2) {
+                        sNeedHaveWaste = "Waste";
+                    }
                     Double lati = jsonObject.getDouble("latitude");
                     Double longi = jsonObject.getDouble("longitude");
                     String city = jsonObject.getString("city");
@@ -286,92 +352,32 @@ public class NeedFragment extends Fragment {
 
                     latLng = new LatLng(lati, longi);
 
-                    NeedEntry meal = new NeedEntry(type+"("+quan+" "+unit+")",
-                            city +", "+province+", for: "+month+", "+year,false);
+                    NeedEntry meal = new NeedEntry(type + "(" + quan + " " + unit + ")",
+                            city + ", " + province + ", for: " + month + ", " + year, false);
 
                     NeedReport needReport = new NeedReport(type, monthStringToInt(month),
                             Integer.parseInt(year), Integer.parseInt(quan));
                     reportList.add(needReport);
 
                     mealList.add(meal);
-
                 }
-                dataAdapter = new CustomMealsAdapter(NeedFragment.this.getContext(),R.layout.need_info, mealList);
-                listView.setAdapter(dataAdapter);
 
+                }else{
+                    Toast.makeText(getActivity(), "No record found", Toast.LENGTH_SHORT).show();
+                }
 
             } catch (JSONException e) {
                 e.printStackTrace();
 
             }
+            dataAdapter = new CustomMealsAdapter(NeedFragment.this.getContext(),R.layout.need_info, mealList);
+            listView.setAdapter(dataAdapter);
 
-//            if(result.equalsIgnoreCase("true"))
-//            {
-//                /* Here launching another activity when login successful. If you persist login state
-//                use sharedPreferences of Android. and logout button to clear sharedPreferences.
-//                 */
-//
-//                Intent intent = new Intent(MainActivity.this,SuccessActivity.class);
-//                startActivity(intent);
-//                MainActivity.this.finish();
-//
-//            }else if (result.equalsIgnoreCase("false")){
-//
-//                // If username and password does not match display a error message
-//                Toast.makeText(MainActivity.this, "Invalid email or password", Toast.LENGTH_LONG).show();
-//
-//            } else if (result.equalsIgnoreCase("exception") || result.equalsIgnoreCase("unsuccessful")) {
-//
-//                Toast.makeText(MainActivity.this, "OOPs! Something went wrong. Connection Problem.", Toast.LENGTH_LONG).show();
-//
-//            }
-//
+
         }
 
     }
 
-
-
-
-
-//    // TODO: Rename method, update argument and hook method into UI event
-//    public void onButtonPressed(Uri uri) {
-//        if (mListener != null) {
-//            mListener.onFragmentInteraction(uri);
-//        }
-//    }
-
-//    @Override
-//    public void onAttach(Context context) {
-//        super.onAttach(context);
-//        if (context instanceof OnFragmentInteractionListener) {
-//            mListener = (OnFragmentInteractionListener) context;
-//        } else {
-//            throw new RuntimeException(context.toString()
-//                    + " must implement OnFragmentInteractionListener");
-//        }
-//    }
-//
-//    @Override
-//    public void onDetach() {
-//        super.onDetach();
-//        mListener = null;
-//    }
-
-//    /**
-//     * This interface must be implemented by activities that contain this
-//     * fragment to allow an interaction in this fragment to be communicated
-//     * to the activity and potentially other fragments contained in that
-//     * activity.
-//     * <p>
-//     * See the Android Training lesson <a href=
-//     * "http://developer.android.com/training/basics/fragments/communicating.html"
-//     * >Communicating with Other Fragments</a> for more information.
-//     */
-//    public interface OnFragmentInteractionListener {
-//        // TODO: Update argument type and name
-//        void onFragmentInteraction(Uri uri);
-//    }
 
     public static int monthStringToInt(String month){
         if (month.equalsIgnoreCase("January")){
