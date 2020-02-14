@@ -2,7 +2,10 @@ package com.example.jam.myapplication;
 
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -33,6 +36,7 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.example.jam.myapplication.addneedhave.Sender;
+import com.example.jam.myapplication.ui.login.LoginActivity;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -575,11 +579,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void goto_login(){
-        SELECTED_NAV = R.id.nav_login;
-        LoginFragment loginFragment = new LoginFragment();
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.frame, loginFragment).commit();
-        fab.hide();
+//        SELECTED_NAV = R.id.nav_login;
+//        LoginFragment loginFragment = new LoginFragment();
+//        FragmentManager fragmentManager = getSupportFragmentManager();
+//        fragmentManager.beginTransaction().replace(R.id.frame, loginFragment).commit();
+//        fab.hide();
+        Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+        this.startActivity(intent);
     }
 
     //====================

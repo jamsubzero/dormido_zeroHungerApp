@@ -161,7 +161,7 @@ public class RegisterActivity extends AppCompatActivity {
                 showProgressBar();
 
                 //register
-                String url = "http://zerop.ml/agri/register.php";
+                String url = getResources().getString(R.string.registration_api);
                 JSONObject params = new JSONObject();
 
                 try {

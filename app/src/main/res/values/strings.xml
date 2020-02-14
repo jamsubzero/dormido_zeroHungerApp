@@ -12,4 +12,23 @@
     <string name="have_message">Display list of supply</string>
     <string name="waste_message">Display list of wastes</string>
     <string name="title_activity_maps">Map</string>
+    <string name="title_activity_login">Sign in</string>
+    <string name="prompt_email">Number / Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Sign in</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="welcome">"Welcome "</string>
+    <string name="invalid_username">Not a valid email or mobile</string>
+    <string name="invalid_password">Password must be >8 characters</string>
+    <string name="login_failed">"Login failed"</string>
+    <string name="invalid_user_type">"Please select a user type"</string>
+    <string name="name_empty">"Name cannot be empty"</string>
+    <string name="invalid_mobile">"Invalid Mobile Number"</string>
+    <string name="invalid_email">"Invalid Email"</string>
+    <string name="password_dont_match">"Password don't match"</string>
+    <string name="no_server">"Cannot connect to server"</string>
+    <string name="registration_success">"Successfully Registered \nPlease Login"</string>
+    <string name="registration_api">"http://zerop.ml/agri/register.php"</string>
+    <string name="login_api">http://zerop.ml/agri/login.php</string>
+    <string name="invalid_user_or_pass">"Invalid username or password"</string>
 </resources>

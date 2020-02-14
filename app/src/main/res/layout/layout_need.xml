@@ -14,7 +14,7 @@
         <!--   android:background="@drawable/border"
         -->
         <Button
-            android:id="@+id/button2"
+            android:id="@+id/submit_btn"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="View Demand Report"
@@ -24,7 +24,7 @@
             android:layout_width="match_parent"
             android:layout_height="2dp"
             android:background="@color/colorPrimaryDark"
-            android:layout_below="@+id/button2"
+            android:layout_below="@+id/submit_btn"
             android:layout_alignParentLeft="true"
             android:layout_alignParentStart="true"
             android:layout_marginTop="4dp"

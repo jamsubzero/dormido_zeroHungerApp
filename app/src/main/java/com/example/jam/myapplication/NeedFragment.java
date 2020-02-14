@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,16 +12,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.jam.myapplication.CustomAdapters.CustomMealsAdapter;
 import com.example.jam.myapplication.Pojos.NeedEntry;
 import com.example.jam.myapplication.Pojos.NeedReport;
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -39,8 +33,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-
-import static com.example.jam.myapplication.MapFragment.mMap;
 
 //
 ///**
@@ -107,7 +99,7 @@ public class NeedFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         //ImageView imageView = (ImageView) getView().findViewById(R.id.foo);
         listView = (ListView) getView().findViewById(R.id.mealList);
-        btn = getView().findViewById(R.id.button2);
+        btn = getView().findViewById(R.id.submit_btn);
         btn.setText("View Demand Report");
         btn.setOnClickListener(new View.OnClickListener() {
             @Override

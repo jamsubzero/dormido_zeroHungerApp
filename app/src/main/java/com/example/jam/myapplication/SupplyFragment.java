@@ -12,7 +12,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.example.jam.myapplication.CustomAdapters.CustomMealsAdapter;
 import com.example.jam.myapplication.Pojos.NeedEntry;
@@ -105,7 +104,7 @@ public class SupplyFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         //ImageView imageView = (ImageView) getView().findViewById(R.id.foo);
         listView = (ListView) getView().findViewById(R.id.mealList);
-        btn = getView().findViewById(R.id.button2);
+        btn = getView().findViewById(R.id.submit_btn);
         btn.setText("View Supply Report");
         btn.setOnClickListener(new View.OnClickListener() {
             @Override
