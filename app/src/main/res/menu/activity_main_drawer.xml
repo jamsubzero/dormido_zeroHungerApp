@@ -21,15 +21,21 @@
             android:icon="@drawable/baseline_warning_24"
             android:title="Food Wastage"
             android:visible="false" />
+        <item
+            android:id="@+id/nav_forcast"
+            android:icon="@drawable/ic_forecast_foreground"
+            android:title="Forcast" />
     </group>
 
     <item android:title="Actions">
         <menu>
             <item
                 android:id="@+id/nav_login"
+                android:icon="@drawable/ic_account_foreground"
                 android:title="Sign in/Register" />
             <item
                 android:id="@+id/nav_logout"
+                android:icon="@drawable/ic_account_foreground"
                 android:title="Logout"
                 android:visible="false" />
             <item
