@@ -214,6 +214,8 @@ public class MainActivity extends AppCompatActivity
             goto_need();
         } else if (id == R.id.nav_have) {
             goto_have();
+        } else if (id == R.id.nav_forcast) {
+            goto_forecast();
         } else if (id == R.id.nav_reports) {
             goto_waste();
         } else if(id == R.id.nav_login){
@@ -612,6 +614,16 @@ public class MainActivity extends AppCompatActivity
         fragmentManager.beginTransaction().replace(R.id.frame, wasteFragment).commit();
         fab.setImageResource(R.drawable.baseline_add_24);
        // fab.setVisibility(View.VISIBLE);
+    }
+
+    private void goto_forecast(){
+        SELECTED_NAV = R.id.nav_reports;
+        //WasteFragment wasteFragment = new WasteFragment();
+        ForecastFragment forecastFragment = new ForecastFragment();
+        //----
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction().replace(R.id.frame, forecastFragment).commit();
+        fab.hide();
     }
 
     private void goto_login(){
