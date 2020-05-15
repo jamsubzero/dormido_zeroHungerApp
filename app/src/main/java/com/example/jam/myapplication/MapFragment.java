@@ -19,6 +19,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -30,7 +34,14 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.Console;
 import java.security.Provider;
+
+import static android.widget.Toast.LENGTH_LONG;
 
 
 ///**
@@ -150,20 +161,83 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
                 runOnUiThread(new Runnable(){
                     public void run() {
 
-                        //TODO: Change from DB
-                        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                       // mMap.addMarker(new MarkerOptions().position(latLng).title("Current Looation"));
                         mMap.isMyLocationEnabled();
 
-                        mMap.addMarker(new MarkerOptions().position(new LatLng(10.175661F,122.944741F)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.farmers)));
-                        mMap.addMarker(new MarkerOptions().position(new LatLng(10.179251F,122.943539F)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.farmers)));
-                        mMap.addMarker(new MarkerOptions().position(new LatLng(10.172493F,122.946200F)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.farmers)));
+                        String url = getResources().getString(R.string.needhavedb_api);
 
-                        mMap.addMarker(new MarkerOptions().position(new LatLng(10.194858, 122.861871)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.cart)));
-                        mMap.addMarker(new MarkerOptions().position(new LatLng(10.194563, 122.861055)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.cart)));
-                        mMap.addMarker(new MarkerOptions().position(new LatLng(10.194690, 122.862149)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.cart)));
-                        mMap.addMarker(new MarkerOptions().position(new LatLng(10.195070, 122.861495)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.cart)));
-                        mMap.addMarker(new MarkerOptions().position(new LatLng(10.195007, 122.861710)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.cart)));
+                        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+                                Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+
+                                    int index = 0;
+                                    int status = 0;
+                                    String message = "";
+                                    BitmapDescriptor map_icon = null;
+
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                Log.d("response", String.valueOf(response));
+                                try{
+
+                                    status = response.getInt("status");
+                                    message = response.getString("message");
+
+                                    if (status == 200){
+
+                                        JSONArray dataJson = response.getJSONArray("data");
+
+                                        while(index < dataJson.length()){
+
+                                            JSONObject dataObj = dataJson.getJSONObject(index); // loop all
+
+                                            Double lat = Double.parseDouble(dataObj.getString("lat"));
+                                            Double lng = Double.parseDouble(dataObj.getString("long"));
+
+                                            Log.d("lat:  " , lat + " long: " + lng);
+
+                                            Integer needHave = dataObj.getInt("need_have");
+
+                                            if (needHave == 1){
+                                                map_icon = BitmapDescriptorFactory.fromResource(R.mipmap.farmers);
+                                            }else{
+                                                map_icon = BitmapDescriptorFactory.fromResource(R.mipmap.cart);
+                                            }
+
+                                            mMap.addMarker(new MarkerOptions().position(new LatLng(lat,lng)).icon(map_icon));
+                                            index++;
+                                        }
+                                    } else {
+                                        Toast.makeText( getContext(), "Server Error", Toast.LENGTH_LONG).show();
+                                    }
+
+
+                                } catch (JSONException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                Log.e("Error", String.valueOf(error));
+                                Toast.makeText( getContext(), "Cannot connect to server", Toast.LENGTH_LONG).show();
+                            }
+                        });
+
+                        MySingleton.getInstance(getContext()).addToRequestQueue(jsonObjectRequest);
+
+                        //TODO: Clustering and custom window info
+                        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                       // mMap.addMarker(new MarkerOptions().position(latLng).title("Current Looation"));
+
+
+//                        mMap.addMarker(new MarkerOptions().position(new LatLng(10.175661F,122.944741F)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.farmers)));
+//                        mMap.addMarker(new MarkerOptions().position(new LatLng(10.179251F,122.943539F)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.farmers)));
+//                        mMap.addMarker(new MarkerOptions().position(new LatLng(10.172493F,122.946200F)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.farmers)));
+//
+//                        mMap.addMarker(new MarkerOptions().position(new LatLng(10.194858, 122.861871)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.cart)));
+//                        mMap.addMarker(new MarkerOptions().position(new LatLng(10.194563, 122.861055)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.cart)));
+//                        mMap.addMarker(new MarkerOptions().position(new LatLng(10.194690, 122.862149)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.cart)));
+//                        mMap.addMarker(new MarkerOptions().position(new LatLng(10.195070, 122.861495)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.cart)));
+//                        mMap.addMarker(new MarkerOptions().position(new LatLng(10.195007, 122.861710)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.cart)));
 
                         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,12));          // UI code goes here
                     }
