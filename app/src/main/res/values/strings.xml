@@ -30,5 +30,6 @@
     <string name="registration_success">"Successfully Registered \nPlease Login"</string>
     <string name="registration_api">"http://zerop.ml/agri/register.php"</string>
     <string name="login_api">http://zerop.ml/agri/login.php</string>
+    <string name="needhavedb_api">http://zerop.ml/agri/getsuppliersfarmers.php</string>
     <string name="invalid_user_or_pass">"Invalid username or password"</string>
 </resources>
