@@ -11,58 +11,84 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-        <ListView
-                android:id="@+id/mealList"
-                android:layout_width="390dp"
-                android:layout_height="483dp"
-                android:layout_above="@+id/forecastSupply2"
-                android:layout_below="@+id/forecastSupply"
-                android:layout_alignParentLeft="true"
-                android:layout_marginLeft="10dp"
-                android:layout_marginTop="13dp"
-                android:layout_marginBottom="16dp" />
 
         <Spinner
-                android:id="@+id/filCrop2"
+                android:id="@+id/filForecastType"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
-                android:layout_below="@+id/filYear3"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentEnd="true"
+                android:layout_marginStart="9dp"
+                android:layout_marginTop="9dp"
+                android:layout_marginEnd="7dp"
+                android:entries="@array/forecast_type" />
+
+        <Spinner
+                android:id="@+id/filForecastCrop"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_below="@+id/filForecastType"
                 android:layout_alignParentStart="true"
                 android:layout_alignParentEnd="true"
-                android:layout_marginStart="11dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="9dp"
                 android:layout_marginEnd="6dp"
                 android:entries="@array/food_type" />
 
         <Spinner
-                android:id="@+id/filYear3"
+                android:id="@+id/filForecastYear"
                 android:layout_width="match_parent"
                 android:layout_height="39dp"
-                android:layout_alignParentTop="true"
+                android:layout_below="@+id/filForecastCrop"
                 android:layout_marginStart="9dp"
-                android:layout_marginTop="11dp"
+                android:layout_marginTop="8dp"
                 android:layout_marginEnd="9dp"
                 android:entries="@array/year" />
 
+        <ListView
+                android:id="@+id/mealList"
+                android:layout_width="389dp"
+                android:layout_height="411dp"
+                android:layout_above="@+id/compareBtn"
+                android:layout_below="@+id/foreCastDetails"
+                android:layout_alignParentLeft="true"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="12dp" />
+
+
         <Button
-                android:id="@+id/forecastSupply"
+                android:id="@+id/forecastBtn"
                 android:layout_width="395dp"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/filCrop2"
+                android:layout_below="@+id/filForecastYear"
                 android:layout_alignParentStart="true"
                 android:layout_alignParentEnd="true"
-                android:layout_marginStart="9dp"
-                android:layout_marginTop="13dp"
-                android:layout_marginEnd="7dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginTop="9dp"
+                android:layout_marginEnd="6dp"
                 android:text="Generate One-year Forecast" />
 
         <Button
-                android:id="@+id/forecastSupply2"
+                android:id="@+id/compareBtn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_marginBottom="12dp"
                 android:text="Compare with Actual Data" />
+
+        <TextView
+                android:id="@+id/foreCastDetails"
+                android:layout_width="381dp"
+                android:layout_height="29dp"
+                android:layout_below="@+id/forecastBtn"
+                android:layout_alignParentEnd="true"
+                android:layout_marginTop="3dp"
+                android:layout_marginEnd="17dp"
+                android:gravity="center"
+                android:hint="No forecast generated"
+                android:textColor="#3F51B5" />
 
 
     </RelativeLayout>

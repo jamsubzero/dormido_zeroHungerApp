@@ -1,6 +1,7 @@
 package com.example.jam.myapplication;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -11,6 +12,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.jam.myapplication.CustomAdapters.CustomMealsAdapter;
@@ -32,6 +35,8 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DateFormatSymbols;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -59,6 +64,25 @@ public class ForecastFragment extends Fragment {
 
     CustomMealsAdapter dataAdapter = null;
 
+    Button forecastBtn;
+
+    Button compareBtn;
+
+
+    String type = "0";
+    String crop = "Rice";
+    String year = "2020";
+
+    Spinner filTypeSpinner;
+    Spinner filCropSpinner;
+    Spinner filYearSpinner;
+
+    TextView forecastDetails;
+
+    public static final String FORECAST_REPORT = "forecast_report";
+
+
+    private static DecimalFormat df = new DecimalFormat("#.##");
 
     public ForecastFragment() {}
 
@@ -75,14 +99,49 @@ public class ForecastFragment extends Fragment {
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        listView = (ListView) getView().findViewById(R.id.mealList);
+        listView = getView().findViewById(R.id.mealList);
+        forecastBtn = getView().findViewById(R.id.forecastBtn);
+        compareBtn = getView().findViewById(R.id.compareBtn);
+
+        filTypeSpinner = getView().findViewById(R.id.filForecastType);
+        filCropSpinner = getView().findViewById(R.id.filForecastCrop);
+        filYearSpinner = getView().findViewById(R.id.filForecastYear);
+        forecastDetails = getView().findViewById(R.id.foreCastDetails);
 
 
-        String year = "2020";
-        String crop = "Rice";
+        forecastBtn.setOnClickListener(view1 -> {
+            if(filCropSpinner.getSelectedItemPosition() !=0 && filYearSpinner.getSelectedItemPosition() != 0 ){
+             crop = filCropSpinner.getSelectedItem().toString();
+             year = filYearSpinner.getSelectedItem().toString();
+             type = filTypeSpinner.getSelectedItemPosition()+"";
 
 
-        new AsyncLogin().execute("0", year, "-1", crop, "-1"); // 0 for need, -1 for skip argument
+             new AsyncLogin().execute(type, year, "-1", crop, "-1"); // 0 for need, -1 for skip argument
+
+
+            }else{
+                Toast.makeText(ForecastFragment.this.getContext(), "Please select crop and year first", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
+        compareBtn.setOnClickListener(view1 -> {
+
+            if (!mealList.isEmpty()){
+                Intent myIntent = new Intent(getActivity(), ReportActivity.class);
+                myIntent.putParcelableArrayListExtra(FORECAST_REPORT, reportList);
+                myIntent.putExtra("type", FORECAST_REPORT);
+                myIntent.putExtra("details", "Forecast and Actual Data of "+crop+ " for year "+ year);
+                startActivityForResult(myIntent, 1);
+
+            }else {
+                Toast.makeText(ForecastFragment.this.getContext(), "No forecast generated. Please generate forecast first", Toast.LENGTH_SHORT).show();
+            }
+
+        });
+
+
+
 
     }
 
@@ -125,8 +184,6 @@ public class ForecastFragment extends Fragment {
                         "&type="+params[3]+
                         "&item="+params[4]+
                         "");
-                // url = new URL(searchUrl);
-                // http://localhost/zeroHungerServer/query.php?type=Grain&item=Rice
 
             } catch (MalformedURLException e) {
                 // TODO Auto-generated catch block
@@ -144,14 +201,6 @@ public class ForecastFragment extends Fragment {
                 conn.setDoInput(true);
                 conn.setDoOutput(true);
 
-                //  Append parameters to URL
-
-//                Uri.Builder builder = new Uri.Builder()
-//                        .appendQueryParameter("type", "Grain")
-//                        .appendQueryParameter("item", "Rice");
-//                String query = builder.build().getEncodedQuery();
-
-                // Open connection for sending data
                 OutputStream os = conn.getOutputStream();
                 BufferedWriter writer = new BufferedWriter(
                         new OutputStreamWriter(os, "UTF-8"));
@@ -208,8 +257,10 @@ public class ForecastFragment extends Fragment {
             Log.i("JSON", result);
             pdLoading.dismiss();
             LatLng latLng = null;
+            mealList = new ArrayList<>();
+            ArrayList<NeedReport>  tempReportList = new ArrayList<>(); // used to generate the forecast
 
-            reportList = new ArrayList<>();
+            reportList = new ArrayList<>(); // used for the graph
             try {
                 if(!result.equals("-1")){
 
@@ -232,13 +283,11 @@ public class ForecastFragment extends Fragment {
                                 city + ", " + province + ", for: " + month + ", " + year, false);
 
                         NeedReport needReport = new NeedReport(type, monthStringToInt(month),
-                                Integer.parseInt(year), Integer.parseInt(quan));
-                        reportList.add(needReport);
+                                Integer.parseInt(year), Double.parseDouble(quan));
+                        tempReportList.add(needReport);
 
                     }
 
-                }else{
-                    Toast.makeText(getActivity(), "No record found", Toast.LENGTH_SHORT).show();
                 }
 
             } catch (JSONException e) {
@@ -248,70 +297,94 @@ public class ForecastFragment extends Fragment {
 
             //===========================================
 
+
+
             //group data into months
 
-            ArrayList<NeedReport> needReportList = reportList;
 
 
-            List<NeedReport> allCrops = needReportList.stream()
+            List<NeedReport> allCrops = tempReportList.stream()
                     .filter(distinctByKey(p -> p.getItemName()))
                     .collect(Collectors.toList());
 
 
-            HashMap<String, HashMap<Integer, Integer>> allRec = createMonthQuanMap(allCrops) ;
+            HashMap<String, HashMap<Integer, Double>> allRec = createMonthQuanMap(allCrops) ;
 
-            for(NeedReport report: needReportList){
+            for(NeedReport report: tempReportList){
 
-                HashMap<Integer, Integer> pair = allRec.get(report.getItemName());
+                HashMap<Integer, Double> pair = allRec.get(report.getItemName());
 
-                int curSum = pair.get(report.getMonth());
+                double curSum = pair.get(report.getMonth());
                 pair.replace(report.getMonth(), curSum + report.getQuan());
 
+            }
+
+            if(isActualDataComplete(allRec)) {
+
+
+                HashMap<String, HashMap<Integer, Double>> forecastedAll = createForecastedMonthQuanMap(allCrops);
+
+                for (NeedReport report : allCrops) {
+
+                    final float CONST_FACTOR = 0.3f;
+
+
+                    HashMap<Integer, Double> actualDataPair = allRec.get(report.getItemName());
+                    HashMap<Integer, Double> forecastedDataPair = forecastedAll.get(report.getItemName());
+
+                    Log.e("crop:", report.getItemName());
+
+                    for (int c = 0; c <= 11; c++) {
+                        Log.e("month " + c + ":", actualDataPair.get(c) + "");
+
+                    }
+
+                    Double actualAvg = getAverageFromActual(new ArrayList<>(actualDataPair.values()));
+                    Log.e("actualAvg:{}", actualAvg.toString());
+
+
+                    forecastedDataPair.put(0, actualAvg);
+                    for (int counter = 0; counter < 12; counter++) {
+
+                        Double curAct = new Double(actualDataPair.get(counter));
+                        Double curFor = forecastedDataPair.get(counter);
+
+                        Double diff = curAct - curFor;
+
+                        Double nextForMonth = (diff * CONST_FACTOR) + curFor;
+
+                        forecastedDataPair.put(counter + 1, nextForMonth);
+
+                    }
+
+                    Log.e("ForeCast", "ForCast:");
+                    final String itemName = crop + " Forecast data";
+                    for (int month = 0; month <= 11; month++) {
+                        Log.e("ForCast month " + month + ":", forecastedDataPair.get(month) + "");
+
+                        NeedEntry meal = new NeedEntry(monthIntToString(month),
+                                df.format(forecastedDataPair.get(month)) + " kg", false);
+                        mealList.add(meal);
+
+                        NeedReport needReport = new NeedReport(itemName + "", month,
+                                Integer.parseInt(year), forecastedDataPair.get(month));
+                        reportList.add(needReport);
+
+                    }
+
+                }
 
             }
 
-            HashMap<String, HashMap<Integer, Double>> forecastedAll = createForecastedMonthQuanMap(allCrops) ;
-
-            for(NeedReport report: allCrops) {
-
-                final float CONST_FACTOR = 0.3f;
-
-
-                HashMap<Integer, Integer> actualDataPair = allRec.get(report.getItemName());
-                HashMap<Integer, Double> forecastedDataPair = forecastedAll.get(report.getItemName());
-
-                Log.e("crop:", report.getItemName());
-
-                for (int c = 0; c <= 11; c++) {
-                    Log.e("month "+c+":", actualDataPair.get(c) + "");
-
-                }
-
-                Double actualAvg = getAverageFromActual(new ArrayList<>(actualDataPair.values()));
-                Log.e("actualAvg:{}" , actualAvg.toString());
-
-
-                forecastedDataPair.put(0, actualAvg);
-                for (int counter = 0 ; counter < 12; counter++){
-
-                    Double curAct = new Double(actualDataPair.get(counter));
-                    Double curFor = forecastedDataPair.get(counter);
-
-                    Double diff = curAct - curFor;
-
-                    Double nextForMonth = (diff * CONST_FACTOR) + curFor;
-
-                    forecastedDataPair.put(counter+1, nextForMonth);
-
-                }
-
-                Log.e("ForeCast", "ForCast:");
-                for (int c = 0; c <= 11; c++) {
-                    Log.e("ForCast month "+c+":", forecastedDataPair.get(c) + "");
-
-                }
-
+            if(mealList.size() > 0) {
+                forecastDetails.setText(generateReportDetails(Integer.parseInt(year), Integer.parseInt(type), crop));
+            } else {
+                forecastDetails.setText(null);
+                Toast.makeText(ForecastFragment.this.getContext(), "Please make sure the actual data for the selected year is complete", Toast.LENGTH_LONG).show();
             }
+
+            dataAdapter = new CustomMealsAdapter(ForecastFragment.this.getContext(),R.layout.need_info, mealList);
+            listView.setAdapter(dataAdapter);
 
 
             //======================================
@@ -323,8 +396,8 @@ public class ForecastFragment extends Fragment {
 
     }
 
-    private Double getAverageFromActual(List<Integer> valueList){
-        return valueList.stream().mapToInt(val -> val).average().orElse(0.0);
+    private Double getAverageFromActual(List<Double> valueList){
+        return valueList.stream().mapToDouble(val -> val).average().orElse(0.0);
 
     }
 
@@ -336,24 +409,24 @@ public class ForecastFragment extends Fragment {
         return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
     }
 
-    private HashMap<String, HashMap<Integer, Integer>> createMonthQuanMap(List<NeedReport> uniqueCrops){
-        HashMap<String, HashMap<Integer, Integer>> all = new HashMap<>();
+    private HashMap<String, HashMap<Integer, Double>> createMonthQuanMap(List<NeedReport> uniqueCrops){
+        HashMap<String, HashMap<Integer, Double>> all = new HashMap<>();
         for(NeedReport crop: uniqueCrops) {
-            HashMap<Integer, Integer> hmap = new HashMap<Integer, Integer>();
+            HashMap<Integer, Double> hmap = new HashMap<>();
 
             /* Key=month, Val=quantity */
-            hmap.put(0, 0);
-            hmap.put(1, 0);
-            hmap.put(2, 0);
-            hmap.put(3, 0);
-            hmap.put(4, 0);
-            hmap.put(5, 0);
-            hmap.put(6, 0);
-            hmap.put(7, 0);
-            hmap.put(8, 0);
-            hmap.put(9, 0);
-            hmap.put(10, 0);
-            hmap.put(11, 0);
+            hmap.put(0, 0.0d);
+            hmap.put(1, 0.0d);
+            hmap.put(2, 0.0d);
+            hmap.put(3, 0.0d);
+            hmap.put(4, 0.0d);
+            hmap.put(5, 0.0d);
+            hmap.put(6, 0.0d);
+            hmap.put(7, 0.0d);
+            hmap.put(8, 0.0d);
+            hmap.put(9, 0.0d);
+            hmap.put(10, 0.0d);
+            hmap.put(11, 0.0d);
 
             all.put(crop.getItemName(), hmap);
         }
@@ -418,6 +491,34 @@ public class ForecastFragment extends Fragment {
         }
 
         return -1;
+    }
+
+    public static String monthIntToString(int month){
+      return new DateFormatSymbols().getMonths()[month];
+
+    }
+
+    private String generateReportDetails(int year, int type, String crop){
+        return (type == 0 ? "Demand" : "Supply") + " forecast of "+crop+" for year " + (year+1);
+    }
+
+    private boolean isActualDataComplete(HashMap<String, HashMap<Integer, Double>> actualData){
+        ArrayList<HashMap<Integer, Double>> actualList = new ArrayList<>(actualData.values()); // assumes there is only one crop
+        if(actualList.size() == 0){
+            return false;
+        }
+
+        HashMap<Integer, Double> actualHasMap = actualList.get(0);
+
+        for (int c = 0; c <= 11; c++) {
+           Double val = actualHasMap.get(c);
+           if(val <= 0){
+               return false;
+           }
+        }
+
+        return true;
+
     }
 
 

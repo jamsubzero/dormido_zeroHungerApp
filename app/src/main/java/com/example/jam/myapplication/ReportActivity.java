@@ -28,36 +28,36 @@ public class ReportActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_report);
 
-        final boolean IS_NEED = getIntent().getBooleanExtra("type", true);
+        final String REPORT_TYPE = getIntent().getStringExtra("type");
 
         LineChart chart = findViewById(R.id.barchart);
 
-        if(IS_NEED){
-            chart.setDescription("Crop Demand Data in kg");
-        }else{
-            chart.setDescription("Crop Supply Data in kg");
+        if(REPORT_TYPE.equals(NeedFragment.NEED_REPORT)){
+            chart.setDescription("Actual Demand Data in kg");
+        }else if(REPORT_TYPE.equals(SupplyFragment.SUPPLY_REPORT)){
+            chart.setDescription("Actual Supply Data in kg");
+        }else if(REPORT_TYPE.equals(ForecastFragment.FORECAST_REPORT)){
+            chart.setDescription(getIntent().getStringExtra("details")); // this will come from the fragment
         }
 
         ArrayList<NeedReport> needReportList = new ArrayList<>();
 
-        if(IS_NEED) {
-            needReportList = getIntent().getParcelableArrayListExtra(NeedFragment.NEED_REPORT);
-        }else{
-            needReportList = getIntent().getParcelableArrayListExtra(SupplyFragment.SUPPLY_REPORT);
-        }
+
+        needReportList = getIntent().getParcelableArrayListExtra(REPORT_TYPE);
+
 
         List<NeedReport> allCrops = needReportList.stream()
                 .filter(distinctByKey(p -> p.getItemName()))
                 .collect(Collectors.toList());
 
 
-        HashMap<String, HashMap<Integer, Integer>> allRec = createMonthQuanMap(allCrops) ;
+        HashMap<String, HashMap<Integer, Double>> allRec = createMonthQuanMap(allCrops) ;
 
             for(NeedReport report: needReportList){
 
-                HashMap<Integer, Integer> pair = allRec.get(report.getItemName());
+                HashMap<Integer, Double> pair = allRec.get(report.getItemName());
 
-                int curSum = pair.get(report.getMonth());
+                Double curSum = pair.get(report.getMonth());
                 pair.replace(report.getMonth(), curSum + report.getQuan());
 
 
@@ -65,7 +65,7 @@ public class ReportActivity extends AppCompatActivity {
 
         for(NeedReport report: allCrops) {
 
-            HashMap<Integer, Integer> pair = allRec.get(report.getItemName());
+            HashMap<Integer, Double> pair = allRec.get(report.getItemName());
             Log.e("crop:", report.getItemName());
 
             for (int c = 0; c <= 11; c++) {
@@ -82,10 +82,10 @@ public class ReportActivity extends AppCompatActivity {
 
             ArrayList cropData = new ArrayList();
 
-            HashMap<Integer, Integer> pair = allRec.get(report.getItemName());
+            HashMap<Integer, Double> pair = allRec.get(report.getItemName());
 
             for (int c = 0; c <= 11; c++) {
-                cropData.add(new BarEntry(pair.get(c), c));
+                cropData.add(new BarEntry(pair.get(c).floatValue(), c));
             }
 
             LineDataSet cropDataSet = new LineDataSet(cropData, report.getItemName());
@@ -120,17 +120,6 @@ public class ReportActivity extends AppCompatActivity {
     }
 
 
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        switch (item.getItemId()) {
-//            case android.R.id.home:
-//                finishActivity(1);
-//                return true;
-//        }
-//
-//        return super.onOptionsItemSelected(item);
-//    }
-
     @Override
     public void onBackPressed() {
         super.onBackPressed();
@@ -150,24 +139,24 @@ public class ReportActivity extends AppCompatActivity {
         return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
     }
 
-    private HashMap<String, HashMap<Integer, Integer>> createMonthQuanMap(List<NeedReport> uniqueCrops){
-        HashMap<String, HashMap<Integer, Integer>> all = new HashMap<>();
+    private HashMap<String, HashMap<Integer, Double>> createMonthQuanMap(List<NeedReport> uniqueCrops){
+        HashMap<String, HashMap<Integer, Double>> all = new HashMap<>();
         for(NeedReport crop: uniqueCrops) {
-            HashMap<Integer, Integer> hmap = new HashMap<Integer, Integer>();
+            HashMap<Integer, Double> hmap = new HashMap<>();
 
             /* Key=month, Val=quantity */
-            hmap.put(0, 0);
-            hmap.put(1, 0);
-            hmap.put(2, 0);
-            hmap.put(3, 0);
-            hmap.put(4, 0);
-            hmap.put(5, 0);
-            hmap.put(6, 0);
-            hmap.put(7, 0);
-            hmap.put(8, 0);
-            hmap.put(9, 0);
-            hmap.put(10, 0);
-            hmap.put(11, 0);
+            hmap.put(0, 0.0d);
+            hmap.put(1, 0.0d);
+            hmap.put(2, 0.0d);
+            hmap.put(3, 0.0d);
+            hmap.put(4, 0.0d);
+            hmap.put(5, 0.0d);
+            hmap.put(6, 0.0d);
+            hmap.put(7, 0.0d);
+            hmap.put(8, 0.0d);
+            hmap.put(9, 0.0d);
+            hmap.put(10, 0.0d);
+            hmap.put(11, 0.0d);
 
             all.put(crop.getItemName(), hmap);
         }

@@ -61,7 +61,6 @@ public class NeedFragment extends Fragment {
     public static final int CONNECTION_TIMEOUT=10000;
     public static final int READ_TIMEOUT=15000;
     public static final String NEED_REPORT = "need_report";
-    public static final boolean IS_NEED = true;
 
 //    private OnFragmentInteractionListener mListener;
 
@@ -168,7 +167,7 @@ public class NeedFragment extends Fragment {
                 Intent myIntent = new Intent(getActivity(), ReportActivity.class);
                 //myIntent.putExtra("key", value); //Optional parameters
                 myIntent.putParcelableArrayListExtra(NEED_REPORT, reportList);
-                myIntent.putExtra("type", IS_NEED);
+                myIntent.putExtra("type", NEED_REPORT);
                 startActivityForResult(myIntent, 1);
 
             }
@@ -186,26 +185,6 @@ public class NeedFragment extends Fragment {
         return inflater.inflate(R.layout.layout_need, container, false);
 
     }
-
-
-//    private void loadMeals(){
-//        ArrayList<NeedEntry> mealList = new ArrayList<NeedEntry>();
-//
-//
-//        {NeedEntry meal = new NeedEntry(1, "jam", false);
-//            mealList.add(meal);}
-//        {NeedEntry meal = new NeedEntry(2, "jam", false);
-//            mealList.add(meal);}
-//        {NeedEntry meal = new NeedEntry(3, "jam", false);
-//            mealList.add(meal);}
-//        {NeedEntry meal = new NeedEntry(4, "jam", false);
-//            mealList.add(meal);}
-//
-//
-//        dataAdapter = new CustomMealsAdapter(NeedFragment.this.getContext(),R.layout.need_info, mealList);
-//        listView.setAdapter(dataAdapter);
-//    }
-
 
 
     private class AsyncLogin extends AsyncTask<String, String, String>
@@ -320,7 +299,7 @@ public class NeedFragment extends Fragment {
             Log.i("JSON", result);
             pdLoading.dismiss();
             LatLng latLng = null;
-            mealList = new ArrayList<NeedEntry>();
+            mealList = new ArrayList<>();
             reportList = new ArrayList<>();
             try {
                 if(!result.equals("-1")){
@@ -356,7 +335,7 @@ public class NeedFragment extends Fragment {
                             city + ", " + province + ", for: " + month + ", " + year, false);
 
                     NeedReport needReport = new NeedReport(type, monthStringToInt(month),
-                            Integer.parseInt(year), Integer.parseInt(quan));
+                            Integer.parseInt(year), Double.parseDouble(quan));
                     reportList.add(needReport);
 
                     mealList.add(meal);

@@ -24,7 +24,7 @@
         <item
             android:id="@+id/nav_forcast"
             android:icon="@drawable/ic_forecast_foreground"
-            android:title="Forcast" />
+            android:title="Forecast" />
     </group>
 
     <item android:title="Actions">

@@ -36,36 +36,18 @@ import java.util.ArrayList;
 
 import static com.example.jam.myapplication.NeedFragment.monthStringToInt;
 
-//
-///**
-// * A simple {@link Fragment} subclass.
-// * Activities that contain this fragment must implement the
-// * {@link NeedFragment.OnFragmentInteractionListener} interface
-// * to handle interaction events.
-// * Use the {@link NeedFragment#newInstance} factory method to
-// * create an instance of this fragment.
-// */
+
 public class SupplyFragment extends Fragment {
-//    // TODO: Rename parameter arguments, choose names that match
-//    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-//    private static final String ARG_PARAM1 = "param1";
-//    private static final String ARG_PARAM2 = "param2";
-//
-//    // TODO: Rename and change types of parameters
-//    private String mParam1;
-//    private String mParam2;
 
     String searchUrl = "http://zerop.ml/agri/query.php";
     public static final int CONNECTION_TIMEOUT=10000;
     public static final int READ_TIMEOUT=15000;
     public static final String SUPPLY_REPORT = "supply_report";
 
-//    private OnFragmentInteractionListener mListener;
-
     ListView listView;
     Button btn;
-    ArrayList<NeedEntry> mealList = new ArrayList<NeedEntry>();
-    ArrayList<NeedReport> reportList = new ArrayList<NeedReport>();
+    ArrayList<NeedEntry> mealList = new ArrayList<>();
+    ArrayList<NeedReport> reportList = new ArrayList<>();
     CustomMealsAdapter dataAdapter = null;
 
 
@@ -73,21 +55,9 @@ public class SupplyFragment extends Fragment {
         // Required empty public constructor
     }
 
-//    /**
-//     * Use this factory method to create a new instance of
-//     * this fragment using the provided parameters.
-//     *
-//     * @param param1 Parameter 1.
-//     * @param param2 Parameter 2.
-//     * @return A new instance of fragment NeedFragment.
-//     */
     // TODO: Rename and change types and number of parameters == String param1, String param2
     public static SupplyFragment newInstance() {
         SupplyFragment fragment = new SupplyFragment();
-//        Bundle args = new Bundle();
-//        args.putString(ARG_PARAM1, param1);
-//        args.putString(ARG_PARAM2, param2);
-//        fragment.setArguments(args);
         return fragment;
     }
 
@@ -112,7 +82,7 @@ public class SupplyFragment extends Fragment {
                 Intent myIntent = new Intent(getActivity(), ReportActivity.class);
                 //myIntent.putExtra("key", value); //Optional parameters
                 myIntent.putParcelableArrayListExtra(SUPPLY_REPORT, reportList);
-                myIntent.putExtra("type", false);
+                myIntent.putExtra("type", SUPPLY_REPORT);
                 startActivityForResult(myIntent, 1);
 
             }
@@ -131,26 +101,6 @@ public class SupplyFragment extends Fragment {
         return inflater.inflate(R.layout.layout_need, container, false);
 
     }
-
-
-//    private void loadMeals(){
-//        ArrayList<NeedEntry> mealList = new ArrayList<NeedEntry>();
-//
-//
-//        {NeedEntry meal = new NeedEntry(1, "jam", false);
-//            mealList.add(meal);}
-//        {NeedEntry meal = new NeedEntry(2, "jam", false);
-//            mealList.add(meal);}
-//        {NeedEntry meal = new NeedEntry(3, "jam", false);
-//            mealList.add(meal);}
-//        {NeedEntry meal = new NeedEntry(4, "jam", false);
-//            mealList.add(meal);}
-//
-//
-//        dataAdapter = new CustomMealsAdapter(NeedFragment.this.getContext(),R.layout.need_info, mealList);
-//        listView.setAdapter(dataAdapter);
-//    }
-
 
 
     private class AsyncLogin extends AsyncTask<String, String, String>
@@ -200,14 +150,6 @@ public class SupplyFragment extends Fragment {
                 conn.setDoInput(true);
                 conn.setDoOutput(true);
 
-                //  Append parameters to URL
-
-//                Uri.Builder builder = new Uri.Builder()
-//                        .appendQueryParameter("type", "Grain")
-//                        .appendQueryParameter("item", "Rice");
-//                String query = builder.build().getEncodedQuery();
-
-                // Open connection for sending data
                 OutputStream os = conn.getOutputStream();
                 BufferedWriter writer = new BufferedWriter(
                         new OutputStreamWriter(os, "UTF-8"));
@@ -296,7 +238,7 @@ public class SupplyFragment extends Fragment {
                             city +", "+province+", for: "+month+", "+year,false);
 
                     NeedReport needReport = new NeedReport(type, monthStringToInt(month),
-                            Integer.parseInt(year), Integer.parseInt(quan));
+                            Integer.parseInt(year), Double.parseDouble(quan));
                     reportList.add(needReport);
 
                     mealList.add(meal);
@@ -312,28 +254,6 @@ public class SupplyFragment extends Fragment {
                 e.printStackTrace();
 
             }
-
-//            if(result.equalsIgnoreCase("true"))
-//            {
-//                /* Here launching another activity when login successful. If you persist login state
-//                use sharedPreferences of Android. and logout button to clear sharedPreferences.
-//                 */
-//
-//                Intent intent = new Intent(MainActivity.this,SuccessActivity.class);
-//                startActivity(intent);
-//                MainActivity.this.finish();
-//
-//            }else if (result.equalsIgnoreCase("false")){
-//
-//                // If username and password does not match display a error message
-//                Toast.makeText(MainActivity.this, "Invalid email or password", Toast.LENGTH_LONG).show();
-//
-//            } else if (result.equalsIgnoreCase("exception") || result.equalsIgnoreCase("unsuccessful")) {
-//
-//                Toast.makeText(MainActivity.this, "OOPs! Something went wrong. Connection Problem.", Toast.LENGTH_LONG).show();
-//
-//            }
-//
         }
 
     }
@@ -341,43 +261,4 @@ public class SupplyFragment extends Fragment {
 
 
 
-
-//    // TODO: Rename method, update argument and hook method into UI event
-//    public void onButtonPressed(Uri uri) {
-//        if (mListener != null) {
-//            mListener.onFragmentInteraction(uri);
-//        }
-//    }
-
-//    @Override
-//    public void onAttach(Context context) {
-//        super.onAttach(context);
-//        if (context instanceof OnFragmentInteractionListener) {
-//            mListener = (OnFragmentInteractionListener) context;
-//        } else {
-//            throw new RuntimeException(context.toString()
-//                    + " must implement OnFragmentInteractionListener");
-//        }
-//    }
-//
-//    @Override
-//    public void onDetach() {
-//        super.onDetach();
-//        mListener = null;
-//    }
-
-//    /**
-//     * This interface must be implemented by activities that contain this
-//     * fragment to allow an interaction in this fragment to be communicated
-//     * to the activity and potentially other fragments contained in that
-//     * activity.
-//     * <p>
-//     * See the Android Training lesson <a href=
-//     * "http://developer.android.com/training/basics/fragments/communicating.html"
-//     * >Communicating with Other Fragments</a> for more information.
-//     */
-//    public interface OnFragmentInteractionListener {
-//        // TODO: Update argument type and name
-//        void onFragmentInteraction(Uri uri);
-//    }
 }

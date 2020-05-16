@@ -9,9 +9,9 @@ public class NeedReport implements Parcelable {
     private String itemName;
     private int month;
     private int year;
-    private int quan;
+    private double quan;
 
-    public NeedReport(String itemName, int month, int year, int quan) {
+    public NeedReport(String itemName, int month, int year, double quan) {
         this.itemName = itemName;
         this.month = month;
         this.year = year;
@@ -30,7 +30,7 @@ public class NeedReport implements Parcelable {
         return year;
     }
 
-    public int getQuan() {
+    public double getQuan() {
         return quan;
     }
 
@@ -45,14 +45,14 @@ public class NeedReport implements Parcelable {
         dest.writeString(this.itemName);
         dest.writeInt(this.month);
         dest.writeInt(this.year);
-        dest.writeInt(this.quan);
+        dest.writeDouble(this.quan);
     }
 
     protected NeedReport(Parcel in) {
         this.itemName = in.readString();
         this.month = in.readInt();
         this.year = in.readInt();
-        this.quan = in.readInt();
+        this.quan = in.readDouble();
     }
 
     public static final Parcelable.Creator<NeedReport> CREATOR = new Parcelable.Creator<NeedReport>() {
