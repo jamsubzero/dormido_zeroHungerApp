@@ -131,7 +131,8 @@ public class ForecastFragment extends Fragment {
 
             if (!mealList.isEmpty()){
 
-                new AsyncActualDataProcessor().execute(type, (year + 1), "-1", crop, "-1"); // 0 for need, -1 for skip argument
+                String nextYear = String.valueOf((Integer.parseInt(year) + 1));
+                new AsyncActualDataProcessor().execute(type, nextYear , "-1", crop, "-1"); // 0 for need, -1 for skip argument
 
             }else {
                 Toast.makeText(ForecastFragment.this.getContext(), "No forecast generated. Please generate forecast first", Toast.LENGTH_SHORT).show();

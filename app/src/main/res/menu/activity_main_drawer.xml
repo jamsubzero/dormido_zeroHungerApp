@@ -4,10 +4,15 @@
     tools:showIn="navigation_view">
 
     <group android:checkableBehavior="single">
+
         <item
             android:id="@+id/nav_map"
             android:icon="@drawable/baseline_place_24"
             android:title="Map" />
+        <item
+                android:id="@+id/nav_forcast"
+                android:icon="@drawable/ic_forecast_foreground"
+                android:title="Forecast" />
         <item
             android:id="@+id/nav_needs"
             android:icon="@drawable/baseline_local_pizza_24"
@@ -21,10 +26,7 @@
             android:icon="@drawable/baseline_warning_24"
             android:title="Food Wastage"
             android:visible="false" />
-        <item
-            android:id="@+id/nav_forcast"
-            android:icon="@drawable/ic_forecast_foreground"
-            android:title="Forecast" />
+
     </group>
 
     <item android:title="Actions">
