@@ -38,6 +38,7 @@ import java.net.URL;
 import java.text.DateFormatSymbols;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -127,16 +128,15 @@ public class ForecastFragment extends Fragment {
 
         compareBtn.setOnClickListener(view1 -> {
 
+
             if (!mealList.isEmpty()){
-                Intent myIntent = new Intent(getActivity(), ReportActivity.class);
-                myIntent.putParcelableArrayListExtra(FORECAST_REPORT, reportList);
-                myIntent.putExtra("type", FORECAST_REPORT);
-                myIntent.putExtra("details", "Forecast and Actual Data of "+crop+ " for year "+ year);
-                startActivityForResult(myIntent, 1);
+
+                new AsyncActualDataProcessor().execute(type, (year + 1), "-1", crop, "-1"); // 0 for need, -1 for skip argument
 
             }else {
                 Toast.makeText(ForecastFragment.this.getContext(), "No forecast generated. Please generate forecast first", Toast.LENGTH_SHORT).show();
             }
+
 
         });
 
@@ -302,11 +302,7 @@ public class ForecastFragment extends Fragment {
             //group data into months
 
 
-
-            List<NeedReport> allCrops = tempReportList.stream()
-                    .filter(distinctByKey(p -> p.getItemName()))
-                    .collect(Collectors.toList());
-
+            List<String> allCrops = Arrays.asList(crop);
 
             HashMap<String, HashMap<Integer, Double>> allRec = createMonthQuanMap(allCrops) ;
 
@@ -324,15 +320,15 @@ public class ForecastFragment extends Fragment {
 
                 HashMap<String, HashMap<Integer, Double>> forecastedAll = createForecastedMonthQuanMap(allCrops);
 
-                for (NeedReport report : allCrops) {
+                for (String crop : allCrops) {
 
                     final float CONST_FACTOR = 0.3f;
 
 
-                    HashMap<Integer, Double> actualDataPair = allRec.get(report.getItemName());
-                    HashMap<Integer, Double> forecastedDataPair = forecastedAll.get(report.getItemName());
+                    HashMap<Integer, Double> actualDataPair = allRec.get(crop);
+                    HashMap<Integer, Double> forecastedDataPair = forecastedAll.get(crop);
 
-                    Log.e("crop:", report.getItemName());
+                    Log.e("crop:", crop);
 
                     for (int c = 0; c <= 11; c++) {
                         Log.e("month " + c + ":", actualDataPair.get(c) + "");
@@ -358,7 +354,7 @@ public class ForecastFragment extends Fragment {
                     }
 
                     Log.e("ForeCast", "ForCast:");
-                    final String itemName = crop + " Forecast data";
+                    final String itemName = "Forecast data";
                     for (int month = 0; month <= 11; month++) {
                         Log.e("ForCast month " + month + ":", forecastedDataPair.get(month) + "");
 
@@ -380,7 +376,7 @@ public class ForecastFragment extends Fragment {
                 forecastDetails.setText(generateReportDetails(Integer.parseInt(year), Integer.parseInt(type), crop));
             } else {
                 forecastDetails.setText(null);
-                Toast.makeText(ForecastFragment.this.getContext(), "Please make sure the actual data for the selected year is complete", Toast.LENGTH_LONG).show();
+                Toast.makeText(ForecastFragment.this.getContext(), "Please make sure the actual data for year " + year +" is complete", Toast.LENGTH_LONG).show();
             }
 
             dataAdapter = new CustomMealsAdapter(ForecastFragment.this.getContext(),R.layout.need_info, mealList);
@@ -391,6 +387,198 @@ public class ForecastFragment extends Fragment {
             //generate forcast
 
 
+
+        }
+
+    }
+
+    private class AsyncActualDataProcessor extends AsyncTask<String, String, String>
+    {
+        ProgressDialog pdLoading = new ProgressDialog(ForecastFragment.this.getContext());
+        HttpURLConnection conn;
+        URL url = null;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+            //this method will be running on UI thread
+            pdLoading.setMessage("\tFetching data...please wait.");
+            pdLoading.setCancelable(false);
+            pdLoading.show();
+
+
+        }
+        @Override
+        protected String doInBackground(String... params) {
+            try {
+
+                // Enter URL address where your php file resides
+                url = new URL(searchUrl+  "?"+
+                        "needhave="+params[0]+
+                        "&year="+params[1]+
+                        "&month="+params[2]+
+                        "&type="+params[3]+
+                        "&item="+params[4]+
+                        "");
+
+            } catch (MalformedURLException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+                return "exception";
+            }
+            try {
+                // Setup HttpURLConnection class to send and receive data from php and mysql
+                conn = (HttpURLConnection)url.openConnection();
+                conn.setReadTimeout(READ_TIMEOUT);
+                conn.setConnectTimeout(CONNECTION_TIMEOUT);
+                conn.setRequestMethod("GET");
+
+                // setDoInput and setDoOutput method depict handling of both send and receive
+                conn.setDoInput(true);
+                conn.setDoOutput(true);
+
+                OutputStream os = conn.getOutputStream();
+                BufferedWriter writer = new BufferedWriter(
+                        new OutputStreamWriter(os, "UTF-8"));
+                // writer.write(query);
+                writer.flush();
+                writer.close();
+                os.close();
+                conn.connect();
+
+            } catch (IOException e1) {
+                // TODO Auto-generated catch block
+                e1.printStackTrace();
+                return "exception";
+            }
+
+            try {
+
+                int response_code = conn.getResponseCode();
+
+                // Check if successful connection made
+                if (response_code == HttpURLConnection.HTTP_OK) {
+
+                    // Read data sent from server
+                    InputStream input = conn.getInputStream();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+                    StringBuilder result = new StringBuilder();
+                    String line;
+
+                    while ((line = reader.readLine()) != null) {
+                        result.append(line);
+                    }
+
+                    // Pass data to onPostExecute method
+                    return(result.toString());
+
+                }else{
+
+                    return("unsuccessful");
+                }
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                return "exception";
+            } finally {
+                conn.disconnect();
+            }
+
+
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+
+            Log.i("JSON", result);
+            pdLoading.dismiss();
+
+            ArrayList<NeedReport> tempReportList = new ArrayList<>(); // used to generate the forecast
+
+            try {
+                if (!result.equals("-1")) {
+
+                    JSONArray jsonArray = new JSONArray(result);
+                    for (int index = 0; index < jsonArray.length(); index++) {
+                        JSONObject jsonObject = jsonArray.getJSONObject(index);
+                        Log.i("JSON 1st ITEM", jsonObject.toString());
+
+                        String quan = jsonObject.getString("quan");
+                        String type = jsonObject.getString("type");
+                        String unit = jsonObject.getString("unit");
+
+                        String city = jsonObject.getString("city");
+                        String province = jsonObject.getString("province");
+                        String year = jsonObject.getString("year");
+                        String month = jsonObject.getString("month");
+
+
+                        NeedEntry meal = new NeedEntry(type + "(" + quan + " " + unit + ")",
+                                city + ", " + province + ", for: " + month + ", " + year, false);
+
+                        NeedReport needReport = new NeedReport(type, monthStringToInt(month),
+                                Integer.parseInt(year), Double.parseDouble(quan));
+                        tempReportList.add(needReport);
+
+                    }
+
+                }
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+
+            }
+
+            //===========================================
+
+
+            //group data into months
+
+
+            List<String> allCrops = Arrays.asList(crop);
+
+
+            HashMap<String, HashMap<Integer, Double>> allRec = createMonthQuanMap(allCrops);
+
+            for (NeedReport report : tempReportList) {
+
+                HashMap<Integer, Double> pair = allRec.get(report.getItemName());
+
+                double curSum = pair.get(report.getMonth());
+                pair.replace(report.getMonth(), curSum + report.getQuan());
+
+            }
+
+
+            ArrayList<HashMap<Integer, Double>> actualList = new ArrayList<>(allRec.values()); // assumes there is only one crop
+            if (actualList.size() != 0) {
+
+
+                HashMap<Integer, Double> actualDataPair = actualList.get(0);
+
+                final String itemName = "Actual data";
+
+                for (int month = 0; month <= 11; month++) {
+                    Log.e("Actaul DATA", itemName + " " + actualDataPair.get(month));
+
+                    NeedReport needReport = new NeedReport(itemName + "", month,
+                            Integer.parseInt(year), actualDataPair.get(month));
+                    reportList.add(needReport);
+
+                }
+
+            }
+
+            if(!reportList.isEmpty()) {
+                Intent myIntent = new Intent(getActivity(), ReportActivity.class);
+                myIntent.putParcelableArrayListExtra(FORECAST_REPORT, reportList);
+                myIntent.putExtra("type", FORECAST_REPORT);
+                myIntent.putExtra("details",  "Forecast and Actual Data for " + (type.equals("0") ? "Demand" : "Supply") + " of " + crop + " for year " + year);
+                startActivityForResult(myIntent, 1);
+            }else{
+                Toast.makeText(ForecastFragment.this.getContext(), "No forecast generated. Please generate forecast first", Toast.LENGTH_SHORT).show();
+            }
 
         }
 
@@ -409,9 +597,9 @@ public class ForecastFragment extends Fragment {
         return t -> seen.putIfAbsent(keyExtractor.apply(t), Boolean.TRUE) == null;
     }
 
-    private HashMap<String, HashMap<Integer, Double>> createMonthQuanMap(List<NeedReport> uniqueCrops){
+    private HashMap<String, HashMap<Integer, Double>> createMonthQuanMap(List<String> uniqueCrops){
         HashMap<String, HashMap<Integer, Double>> all = new HashMap<>();
-        for(NeedReport crop: uniqueCrops) {
+        for(String crop: uniqueCrops) {
             HashMap<Integer, Double> hmap = new HashMap<>();
 
             /* Key=month, Val=quantity */
@@ -428,16 +616,16 @@ public class ForecastFragment extends Fragment {
             hmap.put(10, 0.0d);
             hmap.put(11, 0.0d);
 
-            all.put(crop.getItemName(), hmap);
+            all.put(crop, hmap);
         }
 
         return all;
     }
 
 
-    private HashMap<String, HashMap<Integer, Double>> createForecastedMonthQuanMap(List<NeedReport> uniqueCrops){
+    private HashMap<String, HashMap<Integer, Double>> createForecastedMonthQuanMap(List<String> uniqueCrops){
         HashMap<String, HashMap<Integer, Double>> all = new HashMap<>();
-        for(NeedReport crop: uniqueCrops) {
+        for(String crop: uniqueCrops) {
             HashMap<Integer, Double> hmap = new HashMap<>();
 
             /* Key=month, Val=quantity */
@@ -454,7 +642,7 @@ public class ForecastFragment extends Fragment {
             hmap.put(10, 0.0d);
             hmap.put(11, 0.0d);
 
-            all.put(crop.getItemName(), hmap);
+            all.put(crop, hmap);
         }
 
         return all;
