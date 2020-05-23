@@ -47,10 +47,6 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.example.jam.myapplication.addneedhave.Sender;
 import com.example.jam.myapplication.data.Result;
 import com.example.jam.myapplication.ui.login.LoginActivity;
@@ -670,12 +666,18 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onInfoWindowClick(Marker marker) {
-        showMapDialog(marker, getApplicationContext() , markerViewModel);
+
+        Context context = MainActivity.this.getApplicationContext();
+
+        String url = context.getResources().getString(R.string.needhavedb_api);
+        String id = marker.getSnippet().substring(23);
+        markerViewModel.getMarkerData(Integer.parseInt(id), url, context);
 
         markerViewModel.getMarkerInfoResult().observe(this, new Observer<MarkerInfoResult>() {
             @Override
             public void onChanged(@Nullable MarkerInfoResult markerInfoResult) {
-                updateMapInfoWindow(markerInfoResult.getSuccess());
+                MarkerInfoView model = markerInfoResult.getSuccess();
+                showMapDialog(context, model);
             }
         });
     }
@@ -897,38 +899,45 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    public void showMapDialog(Marker marker, Context context, MarkerViewModel markerViewModel){
-
-        String url = context.getResources().getString(R.string.needhavedb_api);
-
-        String id = marker.getSnippet().substring(23);
+    public void showMapDialog(Context context, MarkerInfoView model){
 
         AlertDialog.Builder mapInfoBuilder = new AlertDialog.Builder(context);
-        mapInfoBuilder.setView(R.layout.custom_info_window_adapter);
 
-        markerViewModel.getMarkerData(Integer.parseInt(id), url, context);
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
+        final View dialogView = inflater.inflate(R.layout.custom_info_window_adapter, null);
+
+        //TODO remove (#)
+
+        TextView forTypeView = dialogView.findViewById(R.id.for_type);
+        forTypeView.setText("(1)" + model.getDisplayForType());
+
+        TextView typeView = dialogView.findViewById(R.id.type);
+        typeView.setText("(2)" + model.getDisplayType());
+
+        TextView quanView = dialogView.findViewById(R.id.quan);
+        quanView.setText("(3)" + model.getDisplayQuantity());
+
+        TextView unitView = dialogView.findViewById(R.id.unit);
+        unitView.setText("(4)" + model.getDisplayUnit());
+
+        TextView userView = dialogView.findViewById(R.id.user);
+        userView.setText("(5)" + model.getDisplayUser());
+
+        TextView numberView = dialogView.findViewById(R.id.number);
+        numberView.setText("(6)" + model.getDisplayNumber());
+
+        TextView emailView = dialogView.findViewById(R.id.email);
+        emailView.setText("(7)" + model.getDisplayEmail());
+
+
+        mapInfoBuilder.setView(dialogView);
 
         mapInfoBuilder.setNegativeButton("Close",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.dismiss();
-                    }
-                });
+                (dialog, id) -> dialog.dismiss());
 
         AlertDialog mapAlert = mapInfoBuilder.create();
         mapAlert.show();
     }
-
-    public void updateMapInfoWindow(MarkerInfoView model){
-        Log.d("display type", model.getDisplayType());
-
-    }
-
-
-
-
-
-
 
 
 } //== END OF CLASS

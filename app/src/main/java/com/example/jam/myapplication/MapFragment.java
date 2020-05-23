@@ -27,6 +27,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.example.jam.myapplication.ui.markerInfo.MarkerInfoResult;
+import com.example.jam.myapplication.ui.markerInfo.MarkerInfoView;
 import com.example.jam.myapplication.ui.markerInfo.MarkerViewModel;
 import com.example.jam.myapplication.ui.markerInfo.MarkerViewModelFactory;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -418,14 +419,21 @@ public class MapFragment extends Fragment implements
         markerViewModel = ViewModelProviders.of(this, new MarkerViewModelFactory()).get(MarkerViewModel.class);
 
         MainActivity m = new MainActivity();
-        m.showMapDialog(marker, getContext(), markerViewModel);
+        Context context = getContext();
+
+        String url = context.getResources().getString(R.string.needhavedb_api);
+        String id = marker.getSnippet().substring(23);
+        markerViewModel.getMarkerData(Integer.parseInt(id), url, context);
 
         markerViewModel.getMarkerInfoResult().observe(this, new Observer<MarkerInfoResult>() {
             @Override
             public void onChanged(@Nullable MarkerInfoResult markerInfoResult) {
-                m.updateMapInfoWindow(markerInfoResult.getSuccess());
+                MarkerInfoView model =  markerInfoResult.getSuccess();
+                m.showMapDialog(context, model);
+
             }
         });
+
     }
 }// END of
 

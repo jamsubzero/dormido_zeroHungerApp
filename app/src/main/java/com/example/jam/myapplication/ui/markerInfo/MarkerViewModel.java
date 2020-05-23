@@ -12,7 +12,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.example.jam.myapplication.MySingleton;
-import com.example.jam.myapplication.R;
 import com.example.jam.myapplication.data.Result;
 
 import org.json.JSONArray;
@@ -75,14 +74,15 @@ public class MarkerViewModel extends ViewModel {
 //                                    ""
 //                            );
 
+                            //TODO put returned data from server here
                             Result<MarkerData> result = markerRepository.getStatus(
-                                    "For Sale",
-                                    "Hotdog",
-                                    "30",
-                                    "kg",
-                                    "uno",
-                                    "09054790111",
-                                    "rlladoc@gmail.com"
+                                    "For Saleyy",
+                                    "Hotdogxxxxxxxxx",
+                                    "305",
+                                    "kgz",
+                                    "unodoz",
+                                    "0905479011199",
+                                    "rlladoc@gmail.comzz"
                             );
 
                             if (result instanceof Result.Success) {
