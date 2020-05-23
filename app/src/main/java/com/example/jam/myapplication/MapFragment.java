@@ -3,6 +3,8 @@ package com.example.jam.myapplication;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
@@ -11,6 +13,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -23,6 +26,9 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.example.jam.myapplication.ui.markerInfo.MarkerInfoResult;
+import com.example.jam.myapplication.ui.markerInfo.MarkerViewModel;
+import com.example.jam.myapplication.ui.markerInfo.MarkerViewModelFactory;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -30,6 +36,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import android.widget.Toast;
@@ -37,11 +44,6 @@ import android.widget.Toast;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.Console;
-import java.security.Provider;
-
-import static android.widget.Toast.LENGTH_LONG;
 
 
 ///**
@@ -52,7 +54,12 @@ import static android.widget.Toast.LENGTH_LONG;
 // * Use the {@link MapFragment#newInstance} factory method to
 // * create an instance of this fragment.
 // */
-public class MapFragment extends Fragment implements OnMapReadyCallback, LocationListener {
+public class MapFragment extends Fragment implements
+        OnMapReadyCallback,
+        LocationListener,
+        GoogleMap.OnMarkerClickListener,
+        GoogleMap.OnInfoWindowClickListener
+{
 //    // TODO: Rename parameter arguments, choose names that match
 //    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 //    private static final String ARG_PARAM1 = "param1";
@@ -63,10 +70,13 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
 //    private String mParam2;
 
     public static GoogleMap mMap;
+    private Marker myMarker;
     private LocationManager locationManager;
     private static final long MIN_TIME = 400;
     private static final float MIN_DISTANCE = 1000;
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
+    private MarkerViewModel markerViewModel;
+
 
 //    private OnFragmentInteractionListener mListener;
 
@@ -134,6 +144,9 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
+
+
+
         mMap = googleMap;
         if(checkPermission()){
             mMap.setMyLocationEnabled(true);
@@ -142,6 +155,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
             askPermission();
         }
 
+        mMap.setOnMarkerClickListener(this);
+        mMap.setOnInfoWindowClickListener(this);
         mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
      //   mMap.getUiSettings().setZoomControlsEnabled(true);
@@ -192,17 +207,31 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
                                             Double lat = Double.parseDouble(dataObj.getString("lat"));
                                             Double lng = Double.parseDouble(dataObj.getString("long"));
 
-                                            Log.d("lat:  " , lat + " long: " + lng);
-
+                                            Integer id = dataObj.getInt("id");
                                             Integer needHave = dataObj.getInt("need_have");
+                                            String type = dataObj.getString("type");
+                                            int quan = dataObj.getInt("quan");
+                                            String unit = dataObj.getString("unit");
+
+                                            String snip =  "Click for more info...\n"+id;
+                                            String title = ": " + type + " (" + quan + " " + unit + ")";
+                                            String preTitle = "";
 
                                             if (needHave == 1){
                                                 map_icon = BitmapDescriptorFactory.fromResource(R.mipmap.farmers);
+                                                preTitle = "For Sale";
                                             }else{
                                                 map_icon = BitmapDescriptorFactory.fromResource(R.mipmap.cart);
+                                                preTitle = "Looking For";
                                             }
 
-                                            mMap.addMarker(new MarkerOptions().position(new LatLng(lat,lng)).icon(map_icon));
+                                            myMarker = mMap.addMarker(new MarkerOptions()
+                                                    .position(new LatLng(lat,lng))
+                                                    .title(preTitle + title)
+                                                    .snippet(snip)
+                                                    .icon(map_icon)
+                                            );
+
                                             index++;
                                         }
                                     } else {
@@ -246,6 +275,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
             }
         };
 
+
+
         MyLocation myLocation = new MyLocation(this.getActivity());
         myLocation.getLocation(locationResult);
         pd.dismiss();
@@ -266,7 +297,6 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
 //        mMap.addMarker(new MarkerOptions().position(latLng).title("Current Looation"));
 //        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 14));
     }
-
 
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {
@@ -377,7 +407,26 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
     }
 
 
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        return false;
+    }
 
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+
+        markerViewModel = ViewModelProviders.of(this, new MarkerViewModelFactory()).get(MarkerViewModel.class);
+
+        MainActivity m = new MainActivity();
+        m.showMapDialog(marker, getContext(), markerViewModel);
+
+        markerViewModel.getMarkerInfoResult().observe(this, new Observer<MarkerInfoResult>() {
+            @Override
+            public void onChanged(@Nullable MarkerInfoResult markerInfoResult) {
+                m.updateMapInfoWindow(markerInfoResult.getSuccess());
+            }
+        });
+    }
 }// END of
 
 //    // TODO: Rename method, update argument and hook method into UI event

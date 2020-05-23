@@ -1,11 +1,20 @@
 package com.example.jam.myapplication;
 
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.arch.lifecycle.LifecycleOwner;
+import android.arch.lifecycle.MutableLiveData;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModel;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -14,6 +23,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -31,14 +41,29 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.example.jam.myapplication.addneedhave.Sender;
+import com.example.jam.myapplication.data.Result;
 import com.example.jam.myapplication.ui.login.LoginActivity;
 import com.example.jam.myapplication.ui.login.Logout;
+import com.example.jam.myapplication.ui.markerInfo.MarkerData;
+import com.example.jam.myapplication.ui.markerInfo.MarkerInfoResult;
+import com.example.jam.myapplication.ui.markerInfo.MarkerInfoView;
+import com.example.jam.myapplication.ui.markerInfo.MarkerViewModel;
+import com.example.jam.myapplication.ui.markerInfo.MarkerViewModelFactory;
 import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -64,12 +89,12 @@ import java.util.Locale;
 import static com.example.jam.myapplication.MapFragment.mMap;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener{
+        implements NavigationView.OnNavigationItemSelectedListener , GoogleMap.OnInfoWindowClickListener {
 
 
     private int SELECTED_NAV = R.id.nav_map; //  map by default
 
-    private ArrayList<Marker> mapMarkers = new ArrayList<Marker>();
+    private MarkerViewModel markerViewModel;
 
     public static final int CONNECTION_TIMEOUT=10000;
     public static final int READ_TIMEOUT=15000;
@@ -92,6 +117,8 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        markerViewModel = ViewModelProviders.of(this, new MarkerViewModelFactory()).get(MarkerViewModel.class);
 
         SharedPreferences sharedPreferences = getSharedPreferences("user", Context.MODE_PRIVATE);
         fab = findViewById(R.id.fab);
@@ -640,6 +667,18 @@ public class MainActivity extends AppCompatActivity
         Intent intent = new Intent(MainActivity.this, Logout.class);
         startActivity(intent);
     }
+
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+        showMapDialog(marker, getApplicationContext() , markerViewModel);
+
+        markerViewModel.getMarkerInfoResult().observe(this, new Observer<MarkerInfoResult>() {
+            @Override
+            public void onChanged(@Nullable MarkerInfoResult markerInfoResult) {
+                updateMapInfoWindow(markerInfoResult.getSuccess());
+            }
+        });
+    }
     //====================
 
     private class AsyncLogin extends AsyncTask<String, String, String>
@@ -754,44 +793,78 @@ public class MainActivity extends AppCompatActivity
 
             //Toast.makeText(MainActivity.this, "Successfully Fetched!", Toast.LENGTH_LONG).show();
             Log.i("JSON", result);
+
+            mMap.clear();
+
             pdLoading.dismiss();
             LatLng latLng = null;
+            BitmapDescriptor map_icon = null;
             try {
                 JSONArray jsonArray  = new JSONArray(result);
                 for(int index = 0; index < jsonArray.length() ; index++){
-                  JSONObject jsonObject  = jsonArray.getJSONObject( index );
-                    Log.i("JSON 1st ITEM", jsonObject.toString());
-                    String item_name = jsonObject.getString("item_name");
-                    String quan = jsonObject.getString("quan");
-                    String unit = jsonObject.getString("unit");
-                    int need_have = jsonObject.getInt("need_have");
-                    String sNeedHaveWaste = "";
-                    if(need_have == 0){sNeedHaveWaste = "Need";}
-                    else if(need_have == 1){sNeedHaveWaste = "Supply";}
-                    else if(need_have == 2){sNeedHaveWaste = "Waste";}
-                    Double lati = jsonObject.getDouble("latitude");
-                    Double longi = jsonObject.getDouble("longitude");
-                    latLng = new LatLng(lati, longi);
+//                    JSONObject jsonObject  = jsonArray.getJSONObject( index );
+//                    Log.i("JSON 1st ITEM", jsonObject.toString());
+//                    String item_name = jsonObject.getString("item_name");
+//                    String quan = jsonObject.getString("quan");
+//                    String unit = jsonObject.getString("unit");
+//                    int need_have = jsonObject.getInt("need_have");
+//                    String sNeedHaveWaste = "";
+//                    if(need_have == 0){sNeedHaveWaste = "Need";}
+//                    else if(need_have == 1){sNeedHaveWaste = "Supply";}
+//                    else if(need_have == 2){sNeedHaveWaste = "Waste";}
+//                    Double lati = jsonObject.getDouble("latitude");
+//                    Double longi = jsonObject.getDouble("longitude");
+//                    latLng = new LatLng(lati, longi);
+//
+//                    Marker marker = mMap.addMarker(new MarkerOptions().position(latLng).title(item_name).
+//                                                                    snippet(quan+" "+unit));
+//                    mapMarkers.add(marker);
 
-                    Marker marker = mMap.addMarker(new MarkerOptions().position(latLng).title(item_name).
-                                                                    snippet(quan+" "+unit));
-                    mapMarkers.add(marker);
+                    JSONObject dataObj = jsonArray.getJSONObject(index); // loop all
+
+                    Double lat = Double.parseDouble(dataObj.getString("latitude"));
+                    Double lng = Double.parseDouble(dataObj.getString("longitude"));
+
+                    Integer id = dataObj.getInt("recID");
+                    Integer needHave = dataObj.getInt("need_have");
+                    String type = dataObj.getString("type");
+                    int quan = dataObj.getInt("quan");
+                    String unit = dataObj.getString("unit");
+
+                    String snip =  "Click for more info...\n"+id;
+                    String title = ": " + type + " (" + quan + " " + unit + ")";
+                    String preTitle = "";
+
+                    if (needHave == 1){
+                        map_icon = BitmapDescriptorFactory.fromResource(R.mipmap.farmers);
+                        preTitle = "For Sale";
+                    }else{
+                        map_icon = BitmapDescriptorFactory.fromResource(R.mipmap.cart);
+                        preTitle = "Looking For";
+                    }
+
+                    mMap.addMarker(new MarkerOptions()
+                            .position(new LatLng(lat,lng))
+                            .title(preTitle + title)
+                            .snippet(snip)
+                            .icon(map_icon)
+                    );
 
                 }
                 if(latLng !=null) {
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 6));
                 }
-                Toast.makeText(MainActivity.this, "Your search returned "+mapMarkers.size()+" results",
-                        Toast.LENGTH_LONG).show();
-      Snackbar.make(fab,
-              "Your search returned "+mapMarkers.size()+" results", Snackbar.LENGTH_LONG).show();
+//                Toast.makeText(MainActivity.this, "Your search returned "+result.length()+" results",
+//                        Toast.LENGTH_LONG).show();
+                Snackbar.make(fab,
+                        "Your search returned "+jsonArray.length()+" results", Snackbar.LENGTH_LONG).show();
 
 
             } catch (JSONException e) {
                 e.printStackTrace();
 
                 Snackbar.make( fab,
-                        "Sorry, we dont have data for that yet.", Snackbar.LENGTH_LONG).show();
+                        "Sorry, we don't have data for that yet.", Snackbar.LENGTH_LONG).show();
 
             }
 
@@ -822,9 +895,33 @@ public class MainActivity extends AppCompatActivity
 
     private void clearMapMarkers(){
 
-        for(Marker marker: mapMarkers){
-            marker.remove();
-        }
+    }
+
+    public void showMapDialog(Marker marker, Context context, MarkerViewModel markerViewModel){
+
+        String url = context.getResources().getString(R.string.needhavedb_api);
+
+        String id = marker.getSnippet().substring(23);
+
+        AlertDialog.Builder mapInfoBuilder = new AlertDialog.Builder(context);
+        mapInfoBuilder.setView(R.layout.custom_info_window_adapter);
+
+        markerViewModel.getMarkerData(Integer.parseInt(id), url, context);
+
+        mapInfoBuilder.setNegativeButton("Close",
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                    }
+                });
+
+        AlertDialog mapAlert = mapInfoBuilder.create();
+        mapAlert.show();
+    }
+
+    public void updateMapInfoWindow(MarkerInfoView model){
+        Log.d("display type", model.getDisplayType());
+
     }
 
 
