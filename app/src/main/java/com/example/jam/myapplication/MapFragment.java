@@ -39,6 +39,8 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.maps.android.clustering.ClusterManager;
+import com.google.maps.android.clustering.view.ClusterRenderer;
 
 import android.widget.Toast;
 
@@ -77,6 +79,8 @@ public class MapFragment extends Fragment implements
     private static final float MIN_DISTANCE = 1000;
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
     private MarkerViewModel markerViewModel;
+    private ClusterManager<MapItem> mClusterManager;
+    AlertDialog mapAlert;
 
 
 //    private OnFragmentInteractionListener mListener;
@@ -146,21 +150,23 @@ public class MapFragment extends Fragment implements
     @Override
     public void onMapReady(GoogleMap googleMap) {
 
-
-
         mMap = googleMap;
         if(checkPermission()){
-            mMap.setMyLocationEnabled(true);
-            mMap.getUiSettings().setMyLocationButtonEnabled(true);
+            getMapData();
+            //setUpCluster();
         }else{
             askPermission();
         }
 
+
+    }
+
+    private void getMapData() {
         mMap.setOnMarkerClickListener(this);
         mMap.setOnInfoWindowClickListener(this);
         mMap.setMyLocationEnabled(true);
         mMap.getUiSettings().setMyLocationButtonEnabled(true);
-     //   mMap.getUiSettings().setZoomControlsEnabled(true);
+        //   mMap.getUiSettings().setZoomControlsEnabled(true);
 //        mMap.getUiSettings().setIndoorLevelPickerEnabled(true);
 //        mMap.getUiSettings().setMapToolbarEnabled(true);
 //        mMap.getUiSettings().setCompassEnabled(true);
@@ -174,89 +180,99 @@ public class MapFragment extends Fragment implements
             @Override
             public void gotLocation(final Location location){
                 MapFragment.this.getActivity().
-                runOnUiThread(new Runnable(){
-                    public void run() {
+                        runOnUiThread(new Runnable(){
+                            public void run() {
 
-                        mMap.isMyLocationEnabled();
+                                mMap.isMyLocationEnabled();
 
-                        String url = getResources().getString(R.string.needhavedb_api);
+                                String url = getResources().getString(R.string.needhavedb_api);
 
-                        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
-                                Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+                                JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+                                        Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
 
                                     int index = 0;
                                     int status = 0;
                                     String message = "";
                                     BitmapDescriptor map_icon = null;
 
-                            @Override
-                            public void onResponse(JSONObject response) {
-                                Log.d("response", String.valueOf(response));
-                                try{
+                                    @Override
+                                    public void onResponse(JSONObject response) {
+                                        Log.d("response", String.valueOf(response));
+                                        try{
 
-                                    status = response.getInt("status");
-                                    message = response.getString("message");
+                                            status = response.getInt("status");
+                                            message = response.getString("message");
 
-                                    if (status == 200){
+                                            if (status == 200){
 
-                                        JSONArray dataJson = response.getJSONArray("data");
+                                                JSONArray dataJson = response.getJSONArray("data");
 
-                                        while(index < dataJson.length()){
+                                                while(index < dataJson.length()){
 
-                                            JSONObject dataObj = dataJson.getJSONObject(index); // loop all
+                                                    JSONObject dataObj = dataJson.getJSONObject(index); // loop all
 
-                                            Double lat = Double.parseDouble(dataObj.getString("lat"));
-                                            Double lng = Double.parseDouble(dataObj.getString("long"));
+                                                    Double lat = Double.parseDouble(dataObj.getString("lat"));
+                                                    Double lng = Double.parseDouble(dataObj.getString("long"));
 
-                                            Integer id = dataObj.getInt("id");
-                                            Integer needHave = dataObj.getInt("need_have");
-                                            String type = dataObj.getString("type");
-                                            int quan = dataObj.getInt("quan");
-                                            String unit = dataObj.getString("unit");
+                                                    Integer id = dataObj.getInt("id");
+                                                    Integer needHave = dataObj.getInt("need_have");
+                                                    String type = dataObj.getString("type");
+                                                    int quan = dataObj.getInt("quan");
+                                                    String unit = dataObj.getString("unit");
 
-                                            String snip =  "Click for more info...\n"+id;
-                                            String title = ": " + type + " (" + quan + " " + unit + ")";
-                                            String preTitle = "";
+                                                    String snip =  "Click for more info...\n"+id;
+                                                    String title = ": " + type + " (" + quan + " " + unit + ")";
+                                                    String preTitle = "";
 
-                                            if (needHave == 1){
-                                                map_icon = BitmapDescriptorFactory.fromResource(R.mipmap.farmers);
-                                                preTitle = "For Sale";
-                                            }else{
-                                                map_icon = BitmapDescriptorFactory.fromResource(R.mipmap.cart);
-                                                preTitle = "Looking For";
+                                                    if (needHave == 1){
+                                                        map_icon = BitmapDescriptorFactory.fromResource(R.mipmap.farmers);
+                                                        preTitle = "For Sale";
+                                                    }else{
+                                                        map_icon = BitmapDescriptorFactory.fromResource(R.mipmap.cart);
+                                                        preTitle = "Looking For";
+                                                    }
+
+                                                    myMarker = mMap.addMarker(new MarkerOptions()
+                                                            .position(new LatLng(lat,lng))
+                                                            .title(preTitle + title)
+                                                            .snippet(snip)
+                                                            .icon(map_icon)
+                                                    );
+
+//                                                    MapItem mapItem = new MapItem(
+//                                                            lat,
+//                                                            lng,
+//                                                            preTitle + title,
+//                                                            snip,
+//                                                            map_icon
+//                                                    );
+//
+//                                                    mClusterManager.addItem(mapItem);
+
+                                                    index++;
+                                                }
+                                            } else {
+                                                Toast.makeText( getContext(), "Server Error", Toast.LENGTH_LONG).show();
                                             }
 
-                                            myMarker = mMap.addMarker(new MarkerOptions()
-                                                    .position(new LatLng(lat,lng))
-                                                    .title(preTitle + title)
-                                                    .snippet(snip)
-                                                    .icon(map_icon)
-                                            );
 
-                                            index++;
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
                                         }
-                                    } else {
-                                        Toast.makeText( getContext(), "Server Error", Toast.LENGTH_LONG).show();
                                     }
+                                }, new Response.ErrorListener() {
+                                    @Override
+                                    public void onErrorResponse(VolleyError error) {
+                                        Log.e("Error", String.valueOf(error));
+                                        Toast.makeText( getContext(), "Cannot connect to server", Toast.LENGTH_LONG).show();
+                                    }
+                                });
 
+                                MySingleton.getInstance(getContext()).addToRequestQueue(jsonObjectRequest);
 
-                                } catch (JSONException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-                        }, new Response.ErrorListener() {
-                            @Override
-                            public void onErrorResponse(VolleyError error) {
-                                Log.e("Error", String.valueOf(error));
-                                Toast.makeText( getContext(), "Cannot connect to server", Toast.LENGTH_LONG).show();
-                            }
-                        });
-
-                        MySingleton.getInstance(getContext()).addToRequestQueue(jsonObjectRequest);
-
-                        //TODO: Clustering and custom window info
-                        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
-                       // mMap.addMarker(new MarkerOptions().position(latLng).title("Current Looation"));
+                                //TODO: Clustering and custom window info
+                                LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                                // mMap.addMarker(new MarkerOptions().position(latLng).title("Current Looation"));
 
 
 //                        mMap.addMarker(new MarkerOptions().position(new LatLng(10.175661F,122.944741F)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.farmers)));
@@ -269,9 +285,9 @@ public class MapFragment extends Fragment implements
 //                        mMap.addMarker(new MarkerOptions().position(new LatLng(10.195070, 122.861495)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.cart)));
 //                        mMap.addMarker(new MarkerOptions().position(new LatLng(10.195007, 122.861710)).icon(BitmapDescriptorFactory.fromResource(R.mipmap.cart)));
 
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,12));          // UI code goes here
-                    }
-                });
+                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng,12));          // UI code goes here
+                            }
+                        });
 
             }
         };
@@ -297,6 +313,17 @@ public class MapFragment extends Fragment implements
 //        Toast.makeText(this.getContext(), latLng.toString(), Toast.LENGTH_LONG).show();
 //        mMap.addMarker(new MarkerOptions().position(latLng).title("Current Looation"));
 //        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 14));
+    }
+
+    private void setUpCluster() {
+//        mClusterManager = new ClusterManager<>(getActivity().getApplicationContext(), mMap);
+//        ClusterRenderer<MapItem> mClusterRenderer = new com.example.jam.myapplication.ClusterRenderer(getContext(), mMap, mClusterManager);
+//        mClusterManager.setRenderer(mClusterRenderer);
+//
+//        mMap.setOnCameraIdleListener(mClusterManager);
+//        mMap.setOnMarkerClickListener(mClusterManager);
+//        mMap.setOnInfoWindowClickListener(mClusterManager);
+
     }
 
     @Override
@@ -418,21 +445,24 @@ public class MapFragment extends Fragment implements
 
         markerViewModel = ViewModelProviders.of(this, new MarkerViewModelFactory()).get(MarkerViewModel.class);
 
-        MainActivity m = new MainActivity();
+        final MainActivity m = new MainActivity();
         Context context = getContext();
 
         String url = context.getResources().getString(R.string.needhavedb_api);
-        String id = marker.getSnippet().substring(23);
-        markerViewModel.getMarkerData(Integer.parseInt(id), url, context);
+        String mid = marker.getSnippet().substring(23);
 
-        markerViewModel.getMarkerInfoResult().observe(this, new Observer<MarkerInfoResult>() {
-            @Override
-            public void onChanged(@Nullable MarkerInfoResult markerInfoResult) {
-                MarkerInfoView model =  markerInfoResult.getSuccess();
-                m.showMapDialog(context, model);
+        markerViewModel.getMarkerData(Integer.parseInt(mid), url, context);
 
-            }
-        });
+        while (!markerViewModel.getMarkerInfoResult().hasObservers()){
+            markerViewModel.getMarkerInfoResult().observe(getActivity(), new Observer<MarkerInfoResult>() {
+                @Override
+                public void onChanged(@Nullable MarkerInfoResult markerInfoResult) {
+                    MarkerInfoView model =  markerInfoResult.getSuccess();
+                    //m.updateDialogData(context, model);
+                    m.showMapDialog(context, model);
+                }
+            });
+        }
 
     }
 }// END of

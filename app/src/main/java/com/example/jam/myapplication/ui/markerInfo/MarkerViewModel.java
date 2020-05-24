@@ -63,6 +63,9 @@ public class MarkerViewModel extends ViewModel {
                             String type = dataObj.getString("type");
                             int quan = dataObj.getInt("quan");
                             String unit = dataObj.getString("unit");
+                            String user = dataObj.getString("name");
+                            String mobile = dataObj.getString("mobile");
+                            String email = dataObj.getString("email");
 
 //                            MarkerData markerData = new MarkerData(
 //                                    "For Sale",
@@ -74,15 +77,22 @@ public class MarkerViewModel extends ViewModel {
 //                                    ""
 //                            );
 
-                            //TODO put returned data from server here
+                            String forType = "";
+
+                            if(needHave == 1 ){
+                                forType = "For Sale";
+                            }else{
+                                forType = "Looking for";
+                            }
+
                             Result<MarkerData> result = markerRepository.getStatus(
-                                    "For Saleyy",
-                                    "Hotdogxxxxxxxxx",
-                                    "305",
-                                    "kgz",
-                                    "unodoz",
-                                    "0905479011199",
-                                    "rlladoc@gmail.comzz"
+                                    forType,
+                                    type,
+                                    String.valueOf(quan),
+                                    unit,
+                                    user,
+                                    mobile,
+                                    email
                             );
 
                             if (result instanceof Result.Success) {

@@ -81,6 +81,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.zip.Inflater;
 
 import static com.example.jam.myapplication.MapFragment.mMap;
 
@@ -669,17 +670,23 @@ public class MainActivity extends AppCompatActivity
 
         Context context = MainActivity.this.getApplicationContext();
 
+        //showMapDialog(context);
+
         String url = context.getResources().getString(R.string.needhavedb_api);
         String id = marker.getSnippet().substring(23);
+
         markerViewModel.getMarkerData(Integer.parseInt(id), url, context);
 
-        markerViewModel.getMarkerInfoResult().observe(this, new Observer<MarkerInfoResult>() {
-            @Override
-            public void onChanged(@Nullable MarkerInfoResult markerInfoResult) {
-                MarkerInfoView model = markerInfoResult.getSuccess();
-                showMapDialog(context, model);
-            }
-        });
+        while (!markerViewModel.getMarkerInfoResult().hasObservers()){
+            markerViewModel.getMarkerInfoResult().observe(this, new Observer<MarkerInfoResult>() {
+                @Override
+                public void onChanged(@Nullable MarkerInfoResult markerInfoResult) {
+                    MarkerInfoView model =  markerInfoResult.getSuccess();
+                    //m.updateDialogData(context, model);
+                    showMapDialog(context, model);
+                }
+            });
+        }
     }
     //====================
 
@@ -906,29 +913,26 @@ public class MainActivity extends AppCompatActivity
         LayoutInflater inflater = (LayoutInflater) context.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
         final View dialogView = inflater.inflate(R.layout.custom_info_window_adapter, null);
 
-        //TODO remove (#)
-
         TextView forTypeView = dialogView.findViewById(R.id.for_type);
-        forTypeView.setText("(1)" + model.getDisplayForType());
+        forTypeView.setText(model.getDisplayForType());
 
         TextView typeView = dialogView.findViewById(R.id.type);
-        typeView.setText("(2)" + model.getDisplayType());
+        typeView.setText(model.getDisplayType());
 
         TextView quanView = dialogView.findViewById(R.id.quan);
-        quanView.setText("(3)" + model.getDisplayQuantity());
+        quanView.setText(model.getDisplayQuantity());
 
         TextView unitView = dialogView.findViewById(R.id.unit);
-        unitView.setText("(4)" + model.getDisplayUnit());
+        unitView.setText(model.getDisplayUnit());
 
         TextView userView = dialogView.findViewById(R.id.user);
-        userView.setText("(5)" + model.getDisplayUser());
+        userView.setText(model.getDisplayUser());
 
         TextView numberView = dialogView.findViewById(R.id.number);
-        numberView.setText("(6)" + model.getDisplayNumber());
+        numberView.setText(model.getDisplayNumber());
 
         TextView emailView = dialogView.findViewById(R.id.email);
-        emailView.setText("(7)" + model.getDisplayEmail());
-
+        emailView.setText(model.getDisplayEmail());
 
         mapInfoBuilder.setView(dialogView);
 
@@ -936,8 +940,13 @@ public class MainActivity extends AppCompatActivity
                 (dialog, id) -> dialog.dismiss());
 
         AlertDialog mapAlert = mapInfoBuilder.create();
+
         mapAlert.show();
     }
+
+//    public void updateDialogData(Context context, MarkerInfoView model){
+//        AlertDialog.Builder mapInfoBuilder = new AlertDialog.Builder(context);
+//    }
 
 
 } //== END OF CLASS
