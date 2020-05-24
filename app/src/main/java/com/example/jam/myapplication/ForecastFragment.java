@@ -72,7 +72,7 @@ public class ForecastFragment extends Fragment {
 
     String type = "0";
     String crop = "Rice";
-    String year = "2020";
+    Integer year = 2020;
 
     Spinner filTypeSpinner;
     Spinner filCropSpinner;
@@ -113,11 +113,11 @@ public class ForecastFragment extends Fragment {
         forecastBtn.setOnClickListener(view1 -> {
             if(filCropSpinner.getSelectedItemPosition() !=0 && filYearSpinner.getSelectedItemPosition() != 0 ){
              crop = filCropSpinner.getSelectedItem().toString();
-             year = filYearSpinner.getSelectedItem().toString();
+             year = Integer.parseInt(filYearSpinner.getSelectedItem().toString());
              type = filTypeSpinner.getSelectedItemPosition()+"";
 
 
-             new AsyncLogin().execute(type, year, "-1", crop, "-1"); // 0 for need, -1 for skip argument
+             new AsyncLogin().execute(type, year+"", "-1", crop, "-1"); // 0 for need, -1 for skip argument
 
 
             }else{
@@ -131,7 +131,7 @@ public class ForecastFragment extends Fragment {
 
             if (!mealList.isEmpty()){
 
-                String nextYear = String.valueOf((Integer.parseInt(year) + 1));
+                String nextYear = String.valueOf(year + 1);
                 new AsyncActualDataProcessor().execute(type, nextYear , "-1", crop, "-1"); // 0 for need, -1 for skip argument
 
             }else {
@@ -366,7 +366,7 @@ public class ForecastFragment extends Fragment {
                         mealList.add(meal);
 
                         NeedReport needReport = new NeedReport(itemName + "", month,
-                                Integer.parseInt(year), forecastedDataPair.get(month));
+                                year, forecastedDataPair.get(month));
                         reportList.add(needReport);
 
                     }
@@ -376,7 +376,7 @@ public class ForecastFragment extends Fragment {
             }
 
             if(mealList.size() > 0) {
-                forecastDetails.setText(generateReportDetails(Integer.parseInt(year), Integer.parseInt(type), crop));
+                forecastDetails.setText(generateReportDetails(year, Integer.parseInt(type), crop));
             } else {
                 forecastDetails.setText(null);
                 Toast.makeText(ForecastFragment.this.getContext(), "Please make sure the actual data for year " + year +" is complete", Toast.LENGTH_LONG).show();
@@ -567,7 +567,7 @@ public class ForecastFragment extends Fragment {
                     Log.e("Actaul DATA", itemName + " " + actualDataPair.get(month));
 
                     NeedReport needReport = new NeedReport(itemName + "", month,
-                            Integer.parseInt(year), actualDataPair.get(month));
+                            year, actualDataPair.get(month));
                     reportList.add(needReport);
 
                 }
@@ -578,7 +578,8 @@ public class ForecastFragment extends Fragment {
                 Intent myIntent = new Intent(getActivity(), ReportActivity.class);
                 myIntent.putParcelableArrayListExtra(FORECAST_REPORT, reportList);
                 myIntent.putExtra("type", FORECAST_REPORT);
-                myIntent.putExtra("details",  "Forecast and Actual Data for " + (type.equals("0") ? "Demand" : "Supply") + " of " + crop + " for year " + year);
+                String nextYear = String.valueOf(year + 1);
+                myIntent.putExtra("details",  "Forecast and Actual Data for " + (type.equals("0") ? "Demand" : "Supply") + " of " + crop + " for year " + nextYear);
                 startActivityForResult(myIntent, 1);
             }else{
                 Toast.makeText(ForecastFragment.this.getContext(), "No forecast generated. Please generate forecast first", Toast.LENGTH_SHORT).show();
@@ -691,7 +692,8 @@ public class ForecastFragment extends Fragment {
     }
 
     private String generateReportDetails(int year, int type, String crop){
-        return (type == 0 ? "Demand" : "Supply") + " forecast of "+crop+" for year " + (year+1);
+        String nextYear = String.valueOf(year + 1);
+        return (type == 0 ? "Demand" : "Supply") + " forecast of "+crop+" for year " + nextYear;
     }
 
     private boolean isActualDataComplete(HashMap<String, HashMap<Integer, Double>> actualData){
