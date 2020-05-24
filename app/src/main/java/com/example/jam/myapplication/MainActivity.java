@@ -1,5 +1,6 @@
 package com.example.jam.myapplication;
 
+import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -9,16 +10,20 @@ import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProviders;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
+import android.media.Image;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -27,6 +32,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 
 import android.util.Log;
@@ -43,6 +49,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -77,6 +84,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -86,15 +94,15 @@ import java.util.zip.Inflater;
 import static com.example.jam.myapplication.MapFragment.mMap;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener , GoogleMap.OnInfoWindowClickListener {
+        implements NavigationView.OnNavigationItemSelectedListener, GoogleMap.OnInfoWindowClickListener {
 
 
     private int SELECTED_NAV = R.id.nav_map; //  map by default
 
     private MarkerViewModel markerViewModel;
 
-    public static final int CONNECTION_TIMEOUT=10000;
-    public static final int READ_TIMEOUT=15000;
+    public static final int CONNECTION_TIMEOUT = 10000;
+    public static final int READ_TIMEOUT = 15000;
 
     private LocationManager locationManager;
     private static final long MIN_TIME = 400;
@@ -107,7 +115,8 @@ public class MainActivity extends AppCompatActivity
 
     MyLocation myLocation;
 
-    FloatingActionButton fab ;
+    FloatingActionButton fab;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -125,24 +134,24 @@ public class MainActivity extends AppCompatActivity
             @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
             @Override
             public void onClick(View view) {
-                if(SELECTED_NAV == R.id.nav_map) {
+                if (SELECTED_NAV == R.id.nav_map) {
                     showSearchDialog();
-                }else if(SELECTED_NAV == R.id.nav_needs) {
-                    if (sharedPreferences.getString("id","").isEmpty()){
+                } else if (SELECTED_NAV == R.id.nav_needs) {
+                    if (sharedPreferences.getString("id", "").isEmpty()) {
                         Toast.makeText(getApplicationContext(), "Please login first", Toast.LENGTH_LONG).show();
                         goto_login();
-                    }else{
-                        showAddNeedsHaveDialog( 0  ); // 0 for need
+                    } else {
+                        showAddNeedsHaveDialog(0); // 0 for need
                     }
-                }else if(SELECTED_NAV == R.id.nav_have){
+                } else if (SELECTED_NAV == R.id.nav_have) {
                     //TODO showAddHavesDialog()
-                    if (sharedPreferences.getString("id","").isEmpty()){
+                    if (sharedPreferences.getString("id", "").isEmpty()) {
                         Toast.makeText(getApplicationContext(), "Please login first", Toast.LENGTH_LONG).show();
                         goto_login();
-                    }else {
+                    } else {
                         showAddNeedsHaveDialog(1); // 1 for have
                     }
-                }else if(SELECTED_NAV == R.id.nav_reports){
+                } else if (SELECTED_NAV == R.id.nav_reports) {
                     showReportWasteDialog();
                 }
 
@@ -175,10 +184,10 @@ public class MainActivity extends AppCompatActivity
 
         Menu menu = navigationView.getMenu();
 
-        if (sharedPreferences.getString("id","").isEmpty()){
+        if (sharedPreferences.getString("id", "").isEmpty()) {
             menu.findItem(R.id.nav_login).setVisible(true);
             menu.findItem(R.id.nav_logout).setVisible(false);
-        }else{
+        } else {
             menu.findItem(R.id.nav_login).setVisible(false);
             menu.findItem(R.id.nav_logout).setVisible(true);
         }
@@ -188,7 +197,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onPause() {
         super.onPause();
-        if(myLocation != null){
+        if (myLocation != null) {
             myLocation.cancelTimer();
         }
     }
@@ -242,7 +251,7 @@ public class MainActivity extends AppCompatActivity
             goto_forecast();
         } else if (id == R.id.nav_reports) {
             goto_waste();
-        } else if(id == R.id.nav_login){
+        } else if (id == R.id.nav_login) {
             goto_login();
         } else if (id == R.id.nav_tipid) {
 
@@ -257,7 +266,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private void showAddNeedsHaveDialog(final int needOrHave){
+    private void showAddNeedsHaveDialog(final int needOrHave) {
 
         // Snackbar.make(view, "Replalckkkke now with your own action", Snackbar.LENGTH_LONG)
         //        .setAction("Action", null).show();
@@ -266,9 +275,9 @@ public class MainActivity extends AppCompatActivity
 
         final AlertDialog.Builder builder1 = new AlertDialog.Builder(MainActivity.this);
         String message = null;
-        if(needOrHave == 0){ // 0 for need
+        if (needOrHave == 0) { // 0 for need
             message = "Add New Demand";
-        }else if(needOrHave ==1){  // 1 for have
+        } else if (needOrHave == 1) {  // 1 for have
             message = "Add New Supply";
         }
         builder1.setMessage(message);
@@ -283,9 +292,9 @@ public class MainActivity extends AppCompatActivity
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
 
-                        MyLocation.LocationResult locationResult = new MyLocation.LocationResult(){
+                        MyLocation.LocationResult locationResult = new MyLocation.LocationResult() {
                             @Override
-                            public void gotLocation(Location location){
+                            public void gotLocation(Location location) {
                                 Spinner type = dialogView.findViewById(R.id.foodtype);
                                 EditText item = dialogView.findViewById(R.id.item); //decription
                                 EditText quan = dialogView.findViewById(R.id.quan);
@@ -303,12 +312,12 @@ public class MainActivity extends AppCompatActivity
 
                                 //
                                 String sLati = String.valueOf(location.getLatitude());
-                                String  sLongi = String.valueOf(location.getLongitude());
+                                String sLongi = String.valueOf(location.getLongitude());
                                 // geocode
                                 String province = null;
                                 String city = null;
                                 //Got the location!
-                                 // 0 for need
+                                // 0 for need
                                 Geocoder geocoder = new Geocoder(MainActivity.this, Locale.getDefault());
                                 List<Address> addresses = null;
                                 try {
@@ -319,17 +328,17 @@ public class MainActivity extends AppCompatActivity
 //                                            122.8484584, 3); // 3 results for accuracy
                                             location.getLatitude(),
                                             location.getLongitude(), 3);// 3 results for accuracy
-                                   // Toast.makeText(MainActivity.this, addresses.get(0).toString(), Toast.LENGTH_LONG).show();
-                                    if(addresses.size()>0) {
+                                    // Toast.makeText(MainActivity.this, addresses.get(0).toString(), Toast.LENGTH_LONG).show();
+                                    if (addresses.size() > 0) {
                                         province = addresses.get(2).getSubAdminArea();
-                                        if(province == null){//if no sub admin, ex: for Metro Manila
-                                           province = addresses.get(2).getAdminArea();
+                                        if (province == null) {//if no sub admin, ex: for Metro Manila
+                                            province = addresses.get(2).getAdminArea();
                                         }
-                                        if(province == null){//if no sub admin, ex: for Metro Manila
+                                        if (province == null) {//if no sub admin, ex: for Metro Manila
                                             province = "UNKNOWN";
                                         }
-                                        city =  addresses.get(2).getLocality();
-                                        if(city == null){
+                                        city = addresses.get(2).getLocality();
+                                        if (city == null) {
                                             city = "UNKNOWN";
                                         }
 
@@ -337,7 +346,7 @@ public class MainActivity extends AppCompatActivity
                                         Log.i("geocode province", province);
                                         Log.i("geocode city", city);
                                         //Log.i("geocode locality", addresses.get(2).toString());
-                                    }else{
+                                    } else {
                                         //TODO UNKNOWN ADDRESS HERE
                                         city = "UNKNOWN";
                                         province = "UNKNOWN";
@@ -356,10 +365,8 @@ public class MainActivity extends AppCompatActivity
                                 }
 
 
-
-
                                 // save(sUserID, sItem_name, sDesc, sLati, sLongi, sNeed_have);
-                                Sender s=new Sender(MainActivity.this, insertUrl,sUserID, sType, sItem_name, sQuan, sUnit, sYear, sMonth, sLati,
+                                Sender s = new Sender(MainActivity.this, insertUrl, sUserID, sType, sItem_name, sQuan, sUnit, sYear, sMonth, sLati,
                                         sLongi, city, province, needOrHave);
                                 s.execute();
                             }
@@ -368,8 +375,6 @@ public class MainActivity extends AppCompatActivity
                         myLocation.getLocation(locationResult);
                         //
                         //=============================END FOR LOCATION
-
-
 
 
 //                        EditText name = dialogView.findViewById(R.id.desc);
@@ -394,10 +399,9 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private void showReportWasteDialog(){
-         final  int WASTE_FLAG = 2; // 2 for waste
+    private void showReportWasteDialog() {
+        final int WASTE_FLAG = 2; // 2 for waste
 
         // Snackbar.make(view, "Replalckkkke now with your own action", Snackbar.LENGTH_LONG)
         //        .setAction("Action", null).show();
@@ -416,9 +420,9 @@ public class MainActivity extends AppCompatActivity
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
 
-                        MyLocation.LocationResult locationResult = new MyLocation.LocationResult(){
+                        MyLocation.LocationResult locationResult = new MyLocation.LocationResult() {
                             @Override
-                            public void gotLocation(Location location){
+                            public void gotLocation(Location location) {
                                 Spinner type = dialogView.findViewById(R.id.reportFoodType);
                                 EditText item = dialogView.findViewById(R.id.reportItem);
                                 EditText quan = dialogView.findViewById(R.id.reportQuan);
@@ -431,7 +435,7 @@ public class MainActivity extends AppCompatActivity
                                 String sUnit = unit.getText().toString();
 
                                 String sLati = String.valueOf(location.getLatitude());
-                                String  sLongi = String.valueOf(location.getLongitude());
+                                String sLongi = String.valueOf(location.getLongitude());
                                 // geocode
                                 String province = null;
                                 String city = null;
@@ -448,16 +452,16 @@ public class MainActivity extends AppCompatActivity
                                             location.getLatitude(),
                                             location.getLongitude(), 3);// 3 results for accuracy
                                     // Toast.makeText(MainActivity.this, addresses.get(0).toString(), Toast.LENGTH_LONG).show();
-                                    if(addresses.size()>0) {
+                                    if (addresses.size() > 0) {
                                         province = addresses.get(2).getSubAdminArea();
-                                        if(province == null){//if no sub admin, ex: for Metro Manila
+                                        if (province == null) {//if no sub admin, ex: for Metro Manila
                                             province = addresses.get(2).getAdminArea();
                                         }
-                                        if(province == null){//if no sub admin, ex: for Metro Manila
+                                        if (province == null) {//if no sub admin, ex: for Metro Manila
                                             province = "UNKNOWN";
                                         }
-                                        city =  addresses.get(2).getLocality();
-                                        if(city == null){
+                                        city = addresses.get(2).getLocality();
+                                        if (city == null) {
                                             city = "UNKNOWN";
                                         }
 
@@ -465,7 +469,7 @@ public class MainActivity extends AppCompatActivity
                                         Log.i("geocode province", province);
                                         Log.i("geocode city", city);
                                         //Log.i("geocode locality", addresses.get(2).toString());
-                                    }else{
+                                    } else {
                                         //TODO UNKNOWN ADDRESS HERE
                                         city = "UNKNOWN";
                                         province = "UNKNOWN";
@@ -484,10 +488,8 @@ public class MainActivity extends AppCompatActivity
                                 }
 
 
-
-
                                 // save(sUserID, sItem_name, sDesc, sLati, sLongi, sNeed_have);
-                                Sender s=new Sender(MainActivity.this, insertUrl,sUserID, sType, sItem_name, sQuan, sUnit, "N/A", "N/A", sLati,
+                                Sender s = new Sender(MainActivity.this, insertUrl, sUserID, sType, sItem_name, sQuan, sUnit, "N/A", "N/A", sLati,
                                         sLongi, city, province, WASTE_FLAG);
                                 s.execute();
                             }
@@ -496,8 +498,6 @@ public class MainActivity extends AppCompatActivity
                         myLocation.getLocation(locationResult);
                         //
                         //=============================END FOR LOCATION
-
-
 
 
 //                        EditText name = dialogView.findViewById(R.id.desc);
@@ -523,10 +523,8 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-
-
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private void showSearchDialog(){
+    private void showSearchDialog() {
 
         final AlertDialog.Builder builder1 = new AlertDialog.Builder(MainActivity.this);
 
@@ -549,27 +547,27 @@ public class MainActivity extends AppCompatActivity
                         EditText item = dialogView.findViewById(R.id.searchItem);
 
                         String sReportType = "-1";
-                        if(reportType.getSelectedItemPosition()!=0){
-                          sReportType = (reportType.getSelectedItemPosition()-1) + ""; // subtract 1 because the flags also starts at 0
+                        if (reportType.getSelectedItemPosition() != 0) {
+                            sReportType = (reportType.getSelectedItemPosition() - 1) + ""; // subtract 1 because the flags also starts at 0
                         }
 
                         String sSearchYear = "-1";
-                        if(searchYear.getSelectedItemPosition()!=0){
+                        if (searchYear.getSelectedItemPosition() != 0) {
                             sSearchYear = searchYear.getSelectedItem().toString();
                         }
                         String sSearchMonth = "-1";
-                        if(searchMonth.getSelectedItemPosition()!=0){
+                        if (searchMonth.getSelectedItemPosition() != 0) {
                             sSearchMonth = searchMonth.getSelectedItem().toString();
                         }
 
                         String sFoodType = "-1";
-                        if(foodType.getSelectedItemPosition()!=0){
+                        if (foodType.getSelectedItemPosition() != 0) {
                             sFoodType = foodType.getSelectedItem().toString();
                         }
 
 
                         String sItem = item.getText().toString() + "";
-                        if(sItem.isEmpty()){
+                        if (sItem.isEmpty()) {
                             sItem = "-1";
                         }
 
@@ -593,8 +591,6 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-
-
     private void goto_map() {
         SELECTED_NAV = R.id.nav_map;
         MapFragment mapFragment = new MapFragment();
@@ -605,31 +601,31 @@ public class MainActivity extends AppCompatActivity
         //fab.setVisibility(View.INVISIBLE);
     }
 
-    private void goto_need(){
+    private void goto_need() {
         SELECTED_NAV = R.id.nav_needs;
         NeedFragment needFragment = new NeedFragment();
-       // ItemFragment needFragment = new ItemFragment();
+        // ItemFragment needFragment = new ItemFragment();
         //----
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.frame, needFragment).commit();
         fab.show();
         fab.setImageResource(R.drawable.baseline_add_24);
-      //  fab.setVisibility(View.VISIBLE);
+        //  fab.setVisibility(View.VISIBLE);
     }
 
-    private void goto_have(){
+    private void goto_have() {
         SELECTED_NAV = R.id.nav_have;
         SupplyFragment haveFragment = new SupplyFragment();
         //----
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.frame, haveFragment).commit();
-       // fab.setVisibility(View.VISIBLE);
+        // fab.setVisibility(View.VISIBLE);
         fab.show();
         fab.setImageResource(R.drawable.baseline_add_24);
 
     }
 
-    private void goto_waste(){
+    private void goto_waste() {
         SELECTED_NAV = R.id.nav_reports;
         //WasteFragment wasteFragment = new WasteFragment();
         WastageFragment wasteFragment = new WastageFragment();
@@ -637,10 +633,10 @@ public class MainActivity extends AppCompatActivity
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.frame, wasteFragment).commit();
         fab.setImageResource(R.drawable.baseline_add_24);
-       // fab.setVisibility(View.VISIBLE);
+        // fab.setVisibility(View.VISIBLE);
     }
 
-    private void goto_forecast(){
+    private void goto_forecast() {
         SELECTED_NAV = R.id.nav_reports;
         //WasteFragment wasteFragment = new WasteFragment();
         ForecastFragment forecastFragment = new ForecastFragment();
@@ -650,7 +646,7 @@ public class MainActivity extends AppCompatActivity
         fab.hide();
     }
 
-    private void goto_login(){
+    private void goto_login() {
 //        SELECTED_NAV = R.id.nav_login;
 //        LoginFragment loginFragment = new LoginFragment();
 //        FragmentManager fragmentManager = getSupportFragmentManager();
@@ -660,7 +656,7 @@ public class MainActivity extends AppCompatActivity
         this.startActivity(intent);
     }
 
-    private  void goto_logout(){
+    private void goto_logout() {
         Intent intent = new Intent(MainActivity.this, Logout.class);
         startActivity(intent);
     }
@@ -677,11 +673,11 @@ public class MainActivity extends AppCompatActivity
 
         markerViewModel.getMarkerData(Integer.parseInt(id), url, context);
 
-        while (!markerViewModel.getMarkerInfoResult().hasObservers()){
+        while (!markerViewModel.getMarkerInfoResult().hasObservers()) {
             markerViewModel.getMarkerInfoResult().observe(this, new Observer<MarkerInfoResult>() {
                 @Override
                 public void onChanged(@Nullable MarkerInfoResult markerInfoResult) {
-                    MarkerInfoView model =  markerInfoResult.getSuccess();
+                    MarkerInfoView model = markerInfoResult.getSuccess();
                     //m.updateDialogData(context, model);
                     showMapDialog(context, model);
                 }
@@ -690,8 +686,7 @@ public class MainActivity extends AppCompatActivity
     }
     //====================
 
-    private class AsyncLogin extends AsyncTask<String, String, String>
-    {
+    private class AsyncLogin extends AsyncTask<String, String, String> {
         ProgressDialog pdLoading = new ProgressDialog(MainActivity.this);
         HttpURLConnection conn;
         URL url = null;
@@ -706,20 +701,21 @@ public class MainActivity extends AppCompatActivity
             pdLoading.show();
 
         }
+
         @Override
         protected String doInBackground(String... params) {
             try {
 
                 // Enter URL address where your php file resides
-                url = new URL(searchUrl+  "?"+
-                        "needhave="+params[0]+
-                        "&year="+params[1]+
-                        "&month="+params[2]+
-                        "&type="+params[3]+
-                        "&item="+params[4]+
+                url = new URL(searchUrl + "?" +
+                        "needhave=" + params[0] +
+                        "&year=" + params[1] +
+                        "&month=" + params[2] +
+                        "&type=" + params[3] +
+                        "&item=" + params[4] +
                         "");
-               // url = new URL(searchUrl);
-               // http://localhost/zeroHungerServer/query.php?type=Grain&item=Rice
+                // url = new URL(searchUrl);
+                // http://localhost/zeroHungerServer/query.php?type=Grain&item=Rice
 
             } catch (MalformedURLException e) {
                 // TODO Auto-generated catch block
@@ -728,7 +724,7 @@ public class MainActivity extends AppCompatActivity
             }
             try {
                 // Setup HttpURLConnection class to send and receive data from php and mysql
-                conn = (HttpURLConnection)url.openConnection();
+                conn = (HttpURLConnection) url.openConnection();
                 conn.setReadTimeout(READ_TIMEOUT);
                 conn.setConnectTimeout(CONNECTION_TIMEOUT);
                 conn.setRequestMethod("GET");
@@ -737,7 +733,7 @@ public class MainActivity extends AppCompatActivity
                 conn.setDoInput(true);
                 conn.setDoOutput(true);
 
-               //  Append parameters to URL
+                //  Append parameters to URL
 
 //                Uri.Builder builder = new Uri.Builder()
 //                        .appendQueryParameter("type", "Grain")
@@ -748,7 +744,7 @@ public class MainActivity extends AppCompatActivity
                 OutputStream os = conn.getOutputStream();
                 BufferedWriter writer = new BufferedWriter(
                         new OutputStreamWriter(os, "UTF-8"));
-             // writer.write(query);
+                // writer.write(query);
                 writer.flush();
                 writer.close();
                 os.close();
@@ -778,11 +774,11 @@ public class MainActivity extends AppCompatActivity
                     }
 
                     // Pass data to onPostExecute method
-                    return(result.toString());
+                    return (result.toString());
 
-                }else{
+                } else {
 
-                    return("unsuccessful");
+                    return ("unsuccessful");
                 }
 
             } catch (IOException e) {
@@ -809,8 +805,8 @@ public class MainActivity extends AppCompatActivity
             LatLng latLng = null;
             BitmapDescriptor map_icon = null;
             try {
-                JSONArray jsonArray  = new JSONArray(result);
-                for(int index = 0; index < jsonArray.length() ; index++){
+                JSONArray jsonArray = new JSONArray(result);
+                for (int index = 0; index < jsonArray.length(); index++) {
 //                    JSONObject jsonObject  = jsonArray.getJSONObject( index );
 //                    Log.i("JSON 1st ITEM", jsonObject.toString());
 //                    String item_name = jsonObject.getString("item_name");
@@ -840,39 +836,39 @@ public class MainActivity extends AppCompatActivity
                     int quan = dataObj.getInt("quan");
                     String unit = dataObj.getString("unit");
 
-                    String snip =  "Click for more info...\n"+id;
+                    String snip = "Click for more info...\n" + id;
                     String title = ": " + type + " (" + quan + " " + unit + ")";
                     String preTitle = "";
 
-                    if (needHave == 1){
+                    if (needHave == 1) {
                         map_icon = BitmapDescriptorFactory.fromResource(R.mipmap.farmers);
                         preTitle = "For Sale";
-                    }else{
+                    } else {
                         map_icon = BitmapDescriptorFactory.fromResource(R.mipmap.cart);
                         preTitle = "Looking For";
                     }
 
                     mMap.addMarker(new MarkerOptions()
-                            .position(new LatLng(lat,lng))
+                            .position(new LatLng(lat, lng))
                             .title(preTitle + title)
                             .snippet(snip)
                             .icon(map_icon)
                     );
 
                 }
-                if(latLng !=null) {
+                if (latLng != null) {
                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 6));
                 }
 //                Toast.makeText(MainActivity.this, "Your search returned "+result.length()+" results",
 //                        Toast.LENGTH_LONG).show();
                 Snackbar.make(fab,
-                        "Your search returned "+jsonArray.length()+" results", Snackbar.LENGTH_LONG).show();
+                        "Your search returned " + jsonArray.length() + " results", Snackbar.LENGTH_LONG).show();
 
 
             } catch (JSONException e) {
                 e.printStackTrace();
 
-                Snackbar.make( fab,
+                Snackbar.make(fab,
                         "Sorry, we don't have data for that yet.", Snackbar.LENGTH_LONG).show();
 
             }
@@ -902,15 +898,15 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    private void clearMapMarkers(){
+    private void clearMapMarkers() {
 
     }
 
-    public void showMapDialog(Context context, MarkerInfoView model){
+    public void showMapDialog(Context context, MarkerInfoView model) {
 
         AlertDialog.Builder mapInfoBuilder = new AlertDialog.Builder(context);
 
-        LayoutInflater inflater = (LayoutInflater) context.getSystemService( Context.LAYOUT_INFLATER_SERVICE );
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         final View dialogView = inflater.inflate(R.layout.custom_info_window_adapter, null);
 
         TextView forTypeView = dialogView.findViewById(R.id.for_type);
@@ -933,6 +929,69 @@ public class MainActivity extends AppCompatActivity
 
         TextView emailView = dialogView.findViewById(R.id.email);
         emailView.setText(model.getDisplayEmail());
+
+        ImageView callButton = dialogView.findViewById(R.id.call_btn);
+        ImageView sendSmsBtn = dialogView.findViewById(R.id.sms_btn);
+        ImageView sendEmailBtn = dialogView.findViewById(R.id.email_btn);
+
+        callButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Log.d("Calling ", model.getDisplayNumber());
+
+                Intent callIntent = new Intent(Intent.ACTION_DIAL);
+                String call = "tel:" + model.getDisplayNumber();
+                callIntent.setData(Uri.parse(call));
+
+                if (ActivityCompat.checkSelfPermission( context, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                    // TODO: Consider calling
+                    //    ActivityCompat#requestPermissions
+                    // here to request the missing permissions, and then overriding
+                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                    //                                          int[] grantResults)
+                    // to handle the case where the user grants the permission. See the documentation
+                    // for ActivityCompat#requestPermissions for more details.
+                    return;
+                }
+
+                context.startActivity(callIntent);
+            }
+        });
+
+        sendSmsBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Log.d("Send message ", model.getDisplayNumber());
+                Intent openSms = new Intent(Intent.ACTION_SENDTO);
+                String sms = "sms:" + model.getDisplayNumber();
+                openSms.setData(Uri.parse(sms));
+
+                try {
+                    context.startActivity(Intent.getIntent(sms));
+                } catch (URISyntaxException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        if(model.getDisplayEmail().isEmpty()){
+            sendEmailBtn.setVisibility(View.GONE);
+        }else {
+            sendEmailBtn.setVisibility(View.VISIBLE);
+            sendEmailBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent emailIntent = new Intent(android.content.Intent.ACTION_SEND);
+
+                    emailIntent.setType("plain/text");
+                    emailIntent.putExtra(android.content.Intent.EXTRA_EMAIL, new String[]{model.getDisplayEmail()});
+                    emailIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, model.getDisplayType());
+                    emailIntent.putExtra(android.content.Intent.EXTRA_TEXT, "");
+
+                    context.startActivity(Intent.createChooser(emailIntent, "Send mail..."));
+                }
+            });
+        }
 
         mapInfoBuilder.setView(dialogView);
 
