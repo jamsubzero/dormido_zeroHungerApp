@@ -1,6 +1,9 @@
 package com.example.jam.myapplication;
 
 import android.app.ProgressDialog;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
+import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -16,6 +19,10 @@ import android.widget.ListView;
 import com.example.jam.myapplication.CustomAdapters.CustomMealsAdapter;
 import com.example.jam.myapplication.Pojos.NeedEntry;
 import com.example.jam.myapplication.Pojos.NeedReport;
+import com.example.jam.myapplication.ui.markerInfo.MarkerInfoResult;
+import com.example.jam.myapplication.ui.markerInfo.MarkerInfoView;
+import com.example.jam.myapplication.ui.markerInfo.MarkerViewModel;
+import com.example.jam.myapplication.ui.markerInfo.MarkerViewModelFactory;
 import com.google.android.gms.maps.model.LatLng;
 
 import org.json.JSONArray;
@@ -49,7 +56,7 @@ public class SupplyFragment extends Fragment {
     ArrayList<NeedEntry> mealList = new ArrayList<>();
     ArrayList<NeedReport> reportList = new ArrayList<>();
     CustomMealsAdapter dataAdapter = null;
-
+    private MarkerViewModel markerViewModel;
 
     public SupplyFragment() {
         // Required empty public constructor
@@ -64,10 +71,6 @@ public class SupplyFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
-
-
     }
 
     @Override
@@ -89,7 +92,32 @@ public class SupplyFragment extends Fragment {
         });
 
         new AsyncLogin().execute("1", "-1", "-1", "-1", "-1");// 0 for need, -1 for skip argument
-       // new AsyncLogin().execute(sReportType, sSearchYear, sSearchMonth, sFoodType, sItem);
+       // sReportType, sSearchYear, sSearchMonth, sFoodType, sItem);
+
+        listView.setOnItemClickListener((adapterView, view1, pos, id) -> {
+            NeedEntry selectedEntry = (NeedEntry) adapterView.getItemAtPosition(pos);
+            Log.i("selectedRecID", selectedEntry.getRecID()+"");
+            String mid = selectedEntry.getRecID()+"";
+
+            markerViewModel = ViewModelProviders.of(SupplyFragment.this, new MarkerViewModelFactory()).get(MarkerViewModel.class);
+
+            final MainActivity m = new MainActivity();
+            Context context = getContext();
+
+            String url = context.getResources().getString(R.string.needhavedb_api);
+
+            markerViewModel.getMarkerData(Integer.parseInt(mid), url, context);
+
+            while (!markerViewModel.getMarkerInfoResult().hasObservers()){
+                markerViewModel.getMarkerInfoResult().observe(getActivity(), new Observer<MarkerInfoResult>() {
+                    @Override
+                    public void onChanged(@Nullable MarkerInfoResult markerInfoResult) {
+                        MarkerInfoView model =  markerInfoResult.getSuccess();
+                        m.showMapDialog(context, model);
+                    }
+                });
+            }
+        });
 
     }
 
@@ -215,6 +243,7 @@ public class SupplyFragment extends Fragment {
                 for(int index = 0; index < jsonArray.length() ; index++){
                     JSONObject jsonObject  = jsonArray.getJSONObject( index );
                     Log.i("JSON 1st ITEM", jsonObject.toString());
+                    Integer recID = jsonObject.getInt("recID");
                     String item_name = jsonObject.getString("item_name");
                     String quan = jsonObject.getString("quan");
                     String type = jsonObject.getString("type");
@@ -234,7 +263,7 @@ public class SupplyFragment extends Fragment {
 
                     latLng = new LatLng(lati, longi);
 
-                    NeedEntry meal = new NeedEntry(type+"("+quan+" "+unit+")",
+                    NeedEntry meal = new NeedEntry(recID,type+"("+quan+" "+unit+")",
                             city +", "+province+", for: "+month+", "+year,false);
 
                     NeedReport needReport = new NeedReport(type, monthStringToInt(month),

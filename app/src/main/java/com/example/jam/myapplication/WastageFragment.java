@@ -251,6 +251,7 @@ public class WastageFragment extends Fragment {
                 for(int index = 0; index < jsonArray.length() ; index++){
                     JSONObject jsonObject  = jsonArray.getJSONObject( index );
                     Log.i("JSON 1st ITEM", jsonObject.toString());
+                    Integer recID = jsonObject.getInt("recID");
                     String item_name = jsonObject.getString("item_name");
                     String quan = jsonObject.getString("quan");
                     String type = jsonObject.getString("type");
@@ -270,8 +271,8 @@ public class WastageFragment extends Fragment {
 
                     latLng = new LatLng(lati, longi);
 
-                    {NeedEntry meal = new NeedEntry(item_name+"("+quan+" "+unit+") - "+type,
-                            city +", "+province+", for: "+month+", "+year,false);
+                    {NeedEntry meal = new NeedEntry(recID,item_name+"("+quan+" "+unit+") - "+type,
+                            city +", "+province+", "+month+", "+year,false);
                         mealList.add(meal);}
 
 

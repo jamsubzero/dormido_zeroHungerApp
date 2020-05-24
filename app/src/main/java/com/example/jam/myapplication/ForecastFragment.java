@@ -270,6 +270,7 @@ public class ForecastFragment extends Fragment {
                         JSONObject jsonObject = jsonArray.getJSONObject(index);
                         Log.i("JSON 1st ITEM", jsonObject.toString());
 
+                        Integer recID = jsonObject.getInt("recID");
                         String quan = jsonObject.getString("quan");
                         String type = jsonObject.getString("type");
                         String unit = jsonObject.getString("unit");
@@ -280,7 +281,7 @@ public class ForecastFragment extends Fragment {
                         String month = jsonObject.getString("month");
 
 
-                        NeedEntry meal = new NeedEntry(type + "(" + quan + " " + unit + ")",
+                        NeedEntry meal = new NeedEntry(recID, type + "(" + quan + " " + unit + ")",
                                 city + ", " + province + ", for: " + month + ", " + year, false);
 
                         NeedReport needReport = new NeedReport(type, monthStringToInt(month),
@@ -358,8 +359,9 @@ public class ForecastFragment extends Fragment {
                     final String itemName = "Forecast data";
                     for (int month = 0; month <= 11; month++) {
                         Log.e("ForCast month " + month + ":", forecastedDataPair.get(month) + "");
+                        Integer noId = -1;
 
-                        NeedEntry meal = new NeedEntry(monthIntToString(month),
+                        NeedEntry meal = new NeedEntry(noId, monthIntToString(month),
                                 df.format(forecastedDataPair.get(month)) + " kg", false);
                         mealList.add(meal);
 
@@ -505,6 +507,7 @@ public class ForecastFragment extends Fragment {
                         JSONObject jsonObject = jsonArray.getJSONObject(index);
                         Log.i("JSON 1st ITEM", jsonObject.toString());
 
+                        Integer recID = jsonObject.getInt("recID");
                         String quan = jsonObject.getString("quan");
                         String type = jsonObject.getString("type");
                         String unit = jsonObject.getString("unit");
@@ -515,7 +518,7 @@ public class ForecastFragment extends Fragment {
                         String month = jsonObject.getString("month");
 
 
-                        NeedEntry meal = new NeedEntry(type + "(" + quan + " " + unit + ")",
+                        NeedEntry meal = new NeedEntry(recID,type + "(" + quan + " " + unit + ")",
                                 city + ", " + province + ", for: " + month + ", " + year, false);
 
                         NeedReport needReport = new NeedReport(type, monthStringToInt(month),

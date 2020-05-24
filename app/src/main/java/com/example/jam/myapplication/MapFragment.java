@@ -39,8 +39,6 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.maps.android.clustering.ClusterManager;
-import com.google.maps.android.clustering.view.ClusterRenderer;
 
 import android.widget.Toast;
 
@@ -79,9 +77,6 @@ public class MapFragment extends Fragment implements
     private static final float MIN_DISTANCE = 1000;
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
     private MarkerViewModel markerViewModel;
-    private ClusterManager<MapItem> mClusterManager;
-    AlertDialog mapAlert;
-
 
 //    private OnFragmentInteractionListener mListener;
 

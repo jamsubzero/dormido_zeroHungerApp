@@ -5,12 +5,14 @@ package com.example.jam.myapplication.Pojos;
  */
 public class NeedEntry {
 
+    Integer recID = null;
     String code = null;
     String name = null;
 
 
-    public NeedEntry(String code, String name, boolean selected) {
+    public NeedEntry(Integer recID, String code, String name, boolean selected) {
         super();
+        this.recID = recID;
         this.code = code;
         this.name = name;
 
@@ -29,6 +31,11 @@ public class NeedEntry {
         this.name = name;
     }
 
+    public Integer getRecID() {
+        return recID;
+    }
 
-
+    public void setRecID(Integer recID) {
+        this.recID = recID;
+    }
 }
