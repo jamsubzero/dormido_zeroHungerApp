@@ -28,6 +28,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
@@ -35,6 +36,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -97,6 +99,9 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, GoogleMap.OnInfoWindowClickListener {
 
 
+    private static int SPLASH_TIMEOUT = 2000;
+
+    private static final int REQUEST_PHONE_CALL = 1;
     private int SELECTED_NAV = R.id.nav_map; //  map by default
 
     private MarkerViewModel markerViewModel;
@@ -951,6 +956,7 @@ public class MainActivity extends AppCompatActivity
                     //                                          int[] grantResults)
                     // to handle the case where the user grants the permission. See the documentation
                     // for ActivityCompat#requestPermissions for more details.
+                    //ActivityCompat.requestPermissions( MainActivity.this, new String[]{Manifest.permission.CALL_PHONE},REQUEST_PHONE_CALL);
                     return;
                 }
 
@@ -1008,4 +1014,26 @@ public class MainActivity extends AppCompatActivity
 //    }
 
 
+    public void checkPermission(String permission, int requestCode)
+    {
+
+        // Checking if permission is not granted 
+        if (ContextCompat.checkSelfPermission(
+                MainActivity.this,
+                permission)
+                == PackageManager.PERMISSION_DENIED) {
+            ActivityCompat
+                    .requestPermissions(
+                            MainActivity.this,
+                            new String[] { permission },
+                            requestCode);
+        }
+        else {
+            Toast
+                    .makeText(MainActivity.this,
+                            "Permission already granted",
+                            Toast.LENGTH_SHORT)
+                    .show();
+        }
+    }
 } //== END OF CLASS

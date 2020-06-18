@@ -14,6 +14,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -77,6 +78,7 @@ public class MapFragment extends Fragment implements
     private static final float MIN_DISTANCE = 1000;
     public static final int MY_PERMISSIONS_REQUEST_LOCATION = 99;
     private MarkerViewModel markerViewModel;
+    private FloatingActionButton fab;
 
 //    private OnFragmentInteractionListener mListener;
 
@@ -138,6 +140,8 @@ public class MapFragment extends Fragment implements
 
         SupportMapFragment mMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         mMapFragment.getMapAsync(this);
+
+        fab = v.findViewById(R.id.fab);
 
         return v;
     }
@@ -432,6 +436,9 @@ public class MapFragment extends Fragment implements
 
     @Override
     public boolean onMarkerClick(Marker marker) {
+
+        FloatingActionButton fab = getView().findViewById(R.id.fab);
+
         return false;
     }
 
