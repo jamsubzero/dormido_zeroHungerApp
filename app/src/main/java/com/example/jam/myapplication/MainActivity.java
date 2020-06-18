@@ -1,34 +1,23 @@
 package com.example.jam.myapplication;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.arch.lifecycle.LifecycleOwner;
-import android.arch.lifecycle.MutableLiveData;
 import android.arch.lifecycle.Observer;
-import android.arch.lifecycle.ViewModel;
 import android.arch.lifecycle.ViewModelProviders;
-import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
-import android.media.Image;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.FloatingActionButton;
@@ -38,7 +27,6 @@ import android.support.v4.app.FragmentManager;
 
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -49,7 +37,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -57,10 +44,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.jam.myapplication.addneedhave.Sender;
-import com.example.jam.myapplication.data.Result;
 import com.example.jam.myapplication.ui.login.LoginActivity;
 import com.example.jam.myapplication.ui.login.Logout;
-import com.example.jam.myapplication.ui.markerInfo.MarkerData;
 import com.example.jam.myapplication.ui.markerInfo.MarkerInfoResult;
 import com.example.jam.myapplication.ui.markerInfo.MarkerInfoView;
 import com.example.jam.myapplication.ui.markerInfo.MarkerViewModel;
@@ -88,10 +73,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.zip.Inflater;
 
 import static com.example.jam.myapplication.MapFragment.mMap;
 
@@ -258,8 +241,8 @@ public class MainActivity extends AppCompatActivity
             goto_waste();
         } else if (id == R.id.nav_login) {
             goto_login();
-        } else if (id == R.id.nav_tipid) {
-
+        } else if (id == R.id.nav_aboutus) {
+            goto_aboutUs();
         } else if (id == R.id.nav_logout) {
             goto_logout();
         }
@@ -663,6 +646,11 @@ public class MainActivity extends AppCompatActivity
 
     private void goto_logout() {
         Intent intent = new Intent(MainActivity.this, Logout.class);
+        startActivity(intent);
+    }
+
+    private void goto_aboutUs(){
+        Intent intent = new Intent(MainActivity.this, AboutUs.class);
         startActivity(intent);
     }
 

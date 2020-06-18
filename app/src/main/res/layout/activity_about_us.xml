@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".AboutUs">
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="281dp"
+        android:layout_height="636dp"
+        android:layout_marginStart="64dp"
+        android:layout_marginTop="52dp"
+        android:layout_marginEnd="64dp"
+        android:text="AGRITECHNO is a mobile assistant for farmers and traders. The main function of the application is to provide services such as the current available supply of crops and vegetables within the trading post and the demand of supply that the traders and consumers want. The app also provides a forecasting feature that helps both farmers and traders in seeking the trends of the demand and supply of vegetables and crops based on the monthly production and supply that the farmers pre harvest registration of their product to be delivered to the market/trading post. he assumption will help in the decision support that the application can provide to both farmers and traders. Another feature of the agricultural product forecasting mobile app is the locator which the farmers can directly contact the farmers that needs a buyer of the crops and vegetable as well as the traders to directly locate and contact the farmers for the product they wanted to buy"
+        android:textAlignment="center"
+        android:textSize="18sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+</android.support.constraint.ConstraintLayout>

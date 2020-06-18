@@ -41,7 +41,7 @@
                 android:title="Logout"
                 android:visible="false" />
             <item
-                android:id="@+id/nav_tipid"
+                android:id="@+id/nav_aboutus"
                 android:icon="@drawable/ic_menu_send"
                 android:title="About" />
         </menu>
