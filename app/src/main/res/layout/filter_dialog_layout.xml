@@ -41,7 +41,7 @@
             android:layout_marginStart="9dp"
             android:layout_marginTop="10dp"
             android:layout_marginEnd="9dp"
-            android:entries="@array/year" />@+id/searchmonth" />
+            android:entries="@array/year" />
 
 
     </RelativeLayout>

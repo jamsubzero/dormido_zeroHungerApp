@@ -15,10 +15,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.jam.myapplication.CustomAdapters.CustomMealsAdapter;
@@ -110,8 +110,7 @@ public class NeedFragment extends Fragment {
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        //ImageView imageView = (ImageView) getView().findViewById(R.id.foo);
-        listView = (ListView) getView().findViewById(R.id.mealList);
+        listView = getView().findViewById(R.id.mealList);
         reportBtn = getView().findViewById(R.id.submit_btn);
         reportBtn.setText("View Demand Report");
         filterBtn = getView().findViewById(R.id.filterBtn);
@@ -124,9 +123,9 @@ public class NeedFragment extends Fragment {
 
                 builder1.setMessage("Filter Demand");
                 builder1.setCancelable(true);
-                builder1.setView(R.layout.filter_demand_layout);
+                builder1.setView(R.layout.filter_dialog_layout);
                 LayoutInflater inflater = getActivity().getLayoutInflater();
-                final View dialogView = inflater.inflate(R.layout.filter_demand_layout, null);
+                final View dialogView = inflater.inflate(R.layout.filter_dialog_layout, null);
                 builder1.setView(dialogView);
                 builder1.setPositiveButton(
                         "Filter",

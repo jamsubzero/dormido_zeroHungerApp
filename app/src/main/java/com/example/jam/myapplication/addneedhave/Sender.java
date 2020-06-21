@@ -3,6 +3,7 @@ package com.example.jam.myapplication.addneedhave;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.support.v7.app.AppCompatActivity;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -19,7 +20,7 @@ import java.net.HttpURLConnection;
 
 public class Sender extends AsyncTask<Void,Void,String> {
 
-    Context c;
+    AppCompatActivity c;
     String urlAddress;
     String type;
     String item_nameTxt;
@@ -30,7 +31,7 @@ public class Sender extends AsyncTask<Void,Void,String> {
     Need need;
     ProgressDialog pd;
 
-    public Sender(Context c, String urlAddress, String userID, String type, String item_name, String quan, String unit,
+    public Sender(AppCompatActivity c, String urlAddress, String userID, String type, String item_name, String quan, String unit,
                   String year, String month, String lati, String longi, String city, String province, int need_have) {
         this.c = c;
         this.urlAddress = urlAddress;
@@ -52,11 +53,14 @@ public class Sender extends AsyncTask<Void,Void,String> {
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
-
-        pd =  new ProgressDialog(c);
-        pd.setTitle("Send");
-        pd.setMessage("Sending...Please wait");
-        pd.show();
+        c.runOnUiThread(new Runnable() {
+            public void run() {
+                pd =  new ProgressDialog(c);
+                pd.setTitle("Send");
+                pd.setMessage("Sending...Please wait");
+                pd.show();
+            }
+        });
     }
 
     @Override

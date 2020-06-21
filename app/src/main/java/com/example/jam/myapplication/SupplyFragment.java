@@ -1,9 +1,11 @@
 package com.example.jam.myapplication;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -15,6 +17,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Spinner;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.jam.myapplication.CustomAdapters.CustomMealsAdapter;
 import com.example.jam.myapplication.Pojos.NeedEntry;
@@ -52,7 +57,7 @@ public class SupplyFragment extends Fragment {
     public static final String SUPPLY_REPORT = "supply_report";
 
     ListView listView;
-    Button btn;
+    Button reportBtn, filterBtn;
     ArrayList<NeedEntry> mealList = new ArrayList<>();
     ArrayList<NeedReport> reportList = new ArrayList<>();
     CustomMealsAdapter dataAdapter = null;
@@ -75,11 +80,68 @@ public class SupplyFragment extends Fragment {
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        //ImageView imageView = (ImageView) getView().findViewById(R.id.foo);
-        listView = (ListView) getView().findViewById(R.id.mealList);
-        btn = getView().findViewById(R.id.submit_btn);
-        btn.setText("View Supply Report");
-        btn.setOnClickListener(new View.OnClickListener() {
+        listView = getView().findViewById(R.id.mealList);
+        reportBtn = getView().findViewById(R.id.submit_btn);
+        reportBtn.setText("View Supply Report");
+
+        filterBtn = getView().findViewById(R.id.filterBtn);
+
+        filterBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //
+                final AlertDialog.Builder builder1 = new AlertDialog.Builder(getActivity());
+
+                builder1.setMessage("Filter Supply");
+                builder1.setCancelable(true);
+                builder1.setView(R.layout.filter_dialog_layout);
+                LayoutInflater inflater = getActivity().getLayoutInflater();
+                final View dialogView = inflater.inflate(R.layout.filter_dialog_layout, null);
+                builder1.setView(dialogView);
+                builder1.setPositiveButton(
+                        "Filter",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                final Spinner filCrop =  dialogView.findViewById(R.id.filCrop);
+                                final Spinner filMonth =  dialogView.findViewById(R.id.filMonth);
+                                final Spinner filYear =  dialogView.findViewById(R.id.filYear);
+                                String sCrop = filCrop.getSelectedItem().toString();
+                                String sMonth = filMonth.getSelectedItem().toString();
+                                String sYear = filYear.getSelectedItem().toString();
+
+                                if(filCrop.getSelectedItemPosition() == 0){
+                                    sCrop = "-1";
+                                }
+                                if(filMonth.getSelectedItemPosition() == 0){
+                                    sMonth = "-1";
+                                }
+                                if(filYear.getSelectedItemPosition()==0){
+                                    sYear = "-1";
+                                }
+
+
+                                new AsyncLogin().execute("1", sYear, sMonth, sCrop, "-1");// 0 for need, -1 for skip argument
+                                dialog.dismiss();
+                            }
+                        });
+
+                builder1.setNegativeButton(
+                        "Cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                dialog.dismiss();
+                            }
+                        });
+
+                AlertDialog alert11 = builder1.create();
+                alert11.show();
+
+                //
+            }
+        });
+
+
+        reportBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent myIntent = new Intent(getActivity(), ReportActivity.class);
@@ -237,8 +299,11 @@ public class SupplyFragment extends Fragment {
             Log.i("JSON", result);
             pdLoading.dismiss();
             LatLng latLng = null;
-            ArrayList<NeedEntry> mealList = new ArrayList<NeedEntry>();
+            ArrayList<NeedEntry> mealList = new ArrayList<>();
+            reportList = new ArrayList<>();
             try {
+                if(!result.equals("-1")){
+
                 JSONArray jsonArray  = new JSONArray(result);
                 for(int index = 0; index < jsonArray.length() ; index++){
                     JSONObject jsonObject  = jsonArray.getJSONObject( index );
@@ -271,19 +336,23 @@ public class SupplyFragment extends Fragment {
                     reportList.add(needReport);
 
                     mealList.add(meal);
-
-
-
                 }
-                dataAdapter = new CustomMealsAdapter(SupplyFragment.this.getContext(),R.layout.need_info, mealList);
-                listView.setAdapter(dataAdapter);
+
+            }else{
+                Toast.makeText(getActivity(), "No record found", Toast.LENGTH_SHORT).show();
+            }
+
 
 
             } catch (JSONException e) {
                 e.printStackTrace();
-
             }
-        }
+
+        dataAdapter = new CustomMealsAdapter(SupplyFragment.this.getContext(),R.layout.need_info, mealList);
+                listView.setAdapter(dataAdapter);
+
+
+    }
 
     }
 
