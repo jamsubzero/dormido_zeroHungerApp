@@ -290,7 +290,14 @@ public class MainActivity extends AppCompatActivity
                                 Spinner year = dialogView.findViewById(R.id.year);
                                 Spinner month = dialogView.findViewById(R.id.month);
 
-                                String sUserID = sharedPreferences.getString("id", "");
+                                if (type.getSelectedItemPosition() != 0 &&
+                                        !item.getText().toString().isEmpty() &&
+                                        !quan.getText().toString().isEmpty() &&
+                                        year.getSelectedItemPosition() != 0 &&
+                                        month.getSelectedItemPosition() != 0
+                                ){
+
+                                    String sUserID = sharedPreferences.getString("id", "");
                                 String sType = type.getSelectedItem().toString();
                                 String sItem_name = item.getText().toString();
                                 String sQuan = quan.getText().toString();
@@ -357,6 +364,17 @@ public class MainActivity extends AppCompatActivity
                                 Sender s = new Sender(MainActivity.this, insertUrl, sUserID, sType, sItem_name, sQuan, sUnit, sYear, sMonth, sLati,
                                         sLongi, city, province, needOrHave);
                                 s.execute();
+                                    dialog.dismiss();
+                            } else{
+                                    MainActivity.this.runOnUiThread(new Runnable()
+                                    {
+                                        public void run()
+                                        {
+                                            Toast.makeText(MainActivity.this, "Save failed, there are unfilled fields", Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                           }
+
                             }
                         };
 
@@ -368,7 +386,6 @@ public class MainActivity extends AppCompatActivity
 //                        EditText name = dialogView.findViewById(R.id.desc);
 //                        Toast.makeText(MainActivity.this, name.getText(), Toast.LENGTH_LONG).show();
 
-                        dialog.dismiss();
                     }
                 });
 

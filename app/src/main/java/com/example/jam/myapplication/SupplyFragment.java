@@ -24,6 +24,7 @@ import android.widget.Toast;
 import com.example.jam.myapplication.CustomAdapters.CustomMealsAdapter;
 import com.example.jam.myapplication.Pojos.NeedEntry;
 import com.example.jam.myapplication.Pojos.NeedReport;
+import com.example.jam.myapplication.addneedhave.Sender;
 import com.example.jam.myapplication.ui.markerInfo.MarkerInfoResult;
 import com.example.jam.myapplication.ui.markerInfo.MarkerInfoView;
 import com.example.jam.myapplication.ui.markerInfo.MarkerViewModel;
@@ -56,11 +57,8 @@ public class SupplyFragment extends Fragment {
     public static final int READ_TIMEOUT=15000;
     public static final String SUPPLY_REPORT = "supply_report";
 
-    ListView listView;
     Button reportBtn, filterBtn;
-    ArrayList<NeedEntry> mealList = new ArrayList<>();
-    ArrayList<NeedReport> reportList = new ArrayList<>();
-    CustomMealsAdapter dataAdapter = null;
+
     private MarkerViewModel markerViewModel;
 
     public SupplyFragment() {
@@ -80,7 +78,7 @@ public class SupplyFragment extends Fragment {
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        listView = getView().findViewById(R.id.mealList);
+        Sender.supplyListView = getView().findViewById(R.id.mealList);
         reportBtn = getView().findViewById(R.id.submit_btn);
         reportBtn.setText("View Supply Report");
 
@@ -146,7 +144,7 @@ public class SupplyFragment extends Fragment {
             public void onClick(View view) {
                 Intent myIntent = new Intent(getActivity(), ReportActivity.class);
                 //myIntent.putExtra("key", value); //Optional parameters
-                myIntent.putParcelableArrayListExtra(SUPPLY_REPORT, reportList);
+                myIntent.putParcelableArrayListExtra(SUPPLY_REPORT, Sender.reportList);
                 myIntent.putExtra("type", SUPPLY_REPORT);
                 startActivityForResult(myIntent, 1);
 
@@ -156,7 +154,7 @@ public class SupplyFragment extends Fragment {
         new AsyncLogin().execute("1", "-1", "-1", "-1", "-1");// 0 for need, -1 for skip argument
        // sReportType, sSearchYear, sSearchMonth, sFoodType, sItem);
 
-        listView.setOnItemClickListener((adapterView, view1, pos, id) -> {
+        Sender.supplyListView.setOnItemClickListener((adapterView, view1, pos, id) -> {
             NeedEntry selectedEntry = (NeedEntry) adapterView.getItemAtPosition(pos);
             Log.i("selectedRecID", selectedEntry.getRecID()+"");
             String mid = selectedEntry.getRecID()+"";
@@ -300,7 +298,7 @@ public class SupplyFragment extends Fragment {
             pdLoading.dismiss();
             LatLng latLng = null;
             ArrayList<NeedEntry> mealList = new ArrayList<>();
-            reportList = new ArrayList<>();
+            Sender.reportList = new ArrayList<>();
             try {
                 if(!result.equals("-1")){
 
@@ -333,7 +331,7 @@ public class SupplyFragment extends Fragment {
 
                     NeedReport needReport = new NeedReport(type, monthStringToInt(month),
                             Integer.parseInt(year), Double.parseDouble(quan));
-                    reportList.add(needReport);
+                    Sender.reportList.add(needReport);
 
                     mealList.add(meal);
                 }
@@ -348,8 +346,8 @@ public class SupplyFragment extends Fragment {
                 e.printStackTrace();
             }
 
-        dataAdapter = new CustomMealsAdapter(SupplyFragment.this.getContext(),R.layout.need_info, mealList);
-                listView.setAdapter(dataAdapter);
+        Sender.dataAdapter = new CustomMealsAdapter(SupplyFragment.this.getContext(),R.layout.need_info, mealList);
+        Sender.supplyListView.setAdapter(Sender.dataAdapter);
 
 
     }

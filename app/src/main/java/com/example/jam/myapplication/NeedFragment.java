@@ -24,6 +24,7 @@ import android.widget.Toast;
 import com.example.jam.myapplication.CustomAdapters.CustomMealsAdapter;
 import com.example.jam.myapplication.Pojos.NeedEntry;
 import com.example.jam.myapplication.Pojos.NeedReport;
+import com.example.jam.myapplication.addneedhave.Sender;
 import com.example.jam.myapplication.ui.markerInfo.MarkerInfoResult;
 import com.example.jam.myapplication.ui.markerInfo.MarkerInfoView;
 import com.example.jam.myapplication.ui.markerInfo.MarkerViewModel;
@@ -72,12 +73,12 @@ public class NeedFragment extends Fragment {
 
 //    private OnFragmentInteractionListener mListener;
 
-    ListView listView;
-    Button reportBtn, filterBtn;
-    ArrayList<NeedEntry> mealList = new ArrayList<NeedEntry>();
-    ArrayList<NeedReport> reportList = new ArrayList<NeedReport>();
 
-    CustomMealsAdapter dataAdapter = null;
+    Button reportBtn, filterBtn;
+
+
+
+
 
     private MarkerViewModel markerViewModel;
 
@@ -110,7 +111,7 @@ public class NeedFragment extends Fragment {
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        listView = getView().findViewById(R.id.mealList);
+        Sender.needListView = getView().findViewById(R.id.mealList);
         reportBtn = getView().findViewById(R.id.submit_btn);
         reportBtn.setText("View Demand Report");
         filterBtn = getView().findViewById(R.id.filterBtn);
@@ -175,7 +176,7 @@ public class NeedFragment extends Fragment {
             public void onClick(View view) {
                 Intent myIntent = new Intent(getActivity(), ReportActivity.class);
                 //myIntent.putExtra("key", value); //Optional parameters
-                myIntent.putParcelableArrayListExtra(NEED_REPORT, reportList);
+                myIntent.putParcelableArrayListExtra(NEED_REPORT, Sender.reportList);
                 myIntent.putExtra("type", NEED_REPORT);
                 startActivityForResult(myIntent, 1);
 
@@ -184,7 +185,7 @@ public class NeedFragment extends Fragment {
         new AsyncLogin().execute("0", "-1", "-1", "-1", "-1");// 0 for need, -1 for skip argument
        // sReportType, sSearchYear, sSearchMonth, sFoodType, sItem);
 
-        listView.setOnItemClickListener((adapterView, view1, pos, id) -> {
+        Sender.needListView.setOnItemClickListener((adapterView, view1, pos, id) -> {
             NeedEntry selectedEntry = (NeedEntry) adapterView.getItemAtPosition(pos);
             Log.i("selectedRecID", selectedEntry.getRecID()+"");
             String mid = selectedEntry.getRecID()+"";
@@ -333,8 +334,8 @@ public class NeedFragment extends Fragment {
             Log.i("JSON", result);
             pdLoading.dismiss();
             LatLng latLng = null;
-            mealList = new ArrayList<>();
-            reportList = new ArrayList<>();
+            Sender.mealList = new ArrayList<>();
+            Sender.reportList = new ArrayList<>();
             try {
                 if(!result.equals("-1")){
 
@@ -358,9 +359,9 @@ public class NeedFragment extends Fragment {
 
                     NeedReport needReport = new NeedReport(type, monthStringToInt(month),
                             Integer.parseInt(year), Double.parseDouble(quan));
-                    reportList.add(needReport);
+                    Sender.reportList.add(needReport);
 
-                    mealList.add(meal);
+                    Sender.mealList.add(meal);
                 }
 
                 }else{
@@ -371,8 +372,8 @@ public class NeedFragment extends Fragment {
                 e.printStackTrace();
 
             }
-            dataAdapter = new CustomMealsAdapter(NeedFragment.this.getContext(),R.layout.need_info, mealList);
-            listView.setAdapter(dataAdapter);
+            Sender.dataAdapter = new CustomMealsAdapter(NeedFragment.this.getContext(),R.layout.need_info, Sender.mealList);
+            Sender.needListView.setAdapter(Sender.dataAdapter);
 
 
         }
@@ -405,8 +406,8 @@ public class NeedFragment extends Fragment {
             return 10;
         }else if (month.equalsIgnoreCase("December")){
             return 11;
+        }else{
+            return 0;
         }
-
-        return -1;
     }
 }

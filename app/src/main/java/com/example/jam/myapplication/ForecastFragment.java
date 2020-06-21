@@ -681,9 +681,9 @@ public class ForecastFragment extends Fragment {
             return 10;
         }else if (month.equalsIgnoreCase("December")){
             return 11;
+        } else {
+            return 0;
         }
-
-        return -1;
     }
 
     public static String monthIntToString(int month){
