@@ -32,11 +32,11 @@ public class MarkerRepository {
             String unit,
             String user,
             String number,
-            String email
-    ) {
+            String email,
+            double price) {
         // handle login
         Result<MarkerData> result = dataSource.getStatus(
-                forType, type, quantity, unit, user, number, email
+                forType, type, quantity, unit, user, number, email, price
         );
         if (result instanceof Result.Success) {
             setMarkerData(((Result.Success<MarkerData>) result).getData());

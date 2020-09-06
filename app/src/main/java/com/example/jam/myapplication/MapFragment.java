@@ -1,6 +1,7 @@
 package com.example.jam.myapplication;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.arch.lifecycle.Observer;
@@ -41,6 +42,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import android.widget.EditText;
 import android.widget.Toast;
 
 import org.json.JSONArray;
@@ -60,8 +62,7 @@ public class MapFragment extends Fragment implements
         OnMapReadyCallback,
         LocationListener,
         GoogleMap.OnMarkerClickListener,
-        GoogleMap.OnInfoWindowClickListener
-{
+        GoogleMap.OnInfoWindowClickListener {
 //    // TODO: Rename parameter arguments, choose names that match
 //    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 //    private static final String ARG_PARAM1 = "param1";
@@ -115,12 +116,11 @@ public class MapFragment extends Fragment implements
 //        CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 10);
 //        mMap.animateCamera(cameraUpdate);
 //  locationManager.removeUpdates(this);
- //       LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        //       LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
 //        Toast.makeText(this.getContext(), location.getLatitude()+"=="+location.getLongitude(), Toast.LENGTH_LONG).show();
- //      mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        //      mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
 //        mMap.setMaxZoomPreference(400);
     }
-
 
 
 //    @Override
@@ -150,16 +150,17 @@ public class MapFragment extends Fragment implements
     public void onMapReady(GoogleMap googleMap) {
 
         mMap = googleMap;
-        if(checkPermission()){
+        if (checkPermission()) {
             getMapData();
             //setUpCluster();
-        }else{
+        } else {
             askPermission();
         }
 
 
     }
 
+    @SuppressLint("MissingPermission")
     private void getMapData() {
         mMap.setOnMarkerClickListener(this);
         mMap.setOnInfoWindowClickListener(this);

@@ -9,8 +9,10 @@ public class MarkerData {
     private String user;
     private String number;
     private String email;
+    private Double price;
 
-    public MarkerData(String forType, String type, String quantity, String unit, String user, String number, String email) {
+    public MarkerData(String forType, String type, String quantity, String unit, String user,
+                      String number, String email, Double price) {
         this.forType = forType;
         this.type = type;
         this.quantity = quantity;
@@ -18,6 +20,7 @@ public class MarkerData {
         this.user = user;
         this.number = number;
         this.email = email;
+        this.price = price;
     }
 
     public String getForType() {
@@ -46,5 +49,9 @@ public class MarkerData {
 
     public String getEmail() {
         return email;
+    }
+
+    public Double getPrice() {
+        return price;
     }
 }

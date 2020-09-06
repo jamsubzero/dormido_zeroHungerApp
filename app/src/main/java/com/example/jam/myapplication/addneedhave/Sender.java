@@ -50,6 +50,7 @@ public class Sender extends AsyncTask<Void,Void,String> {
     Need need;
     ProgressDialog pd;
     int need_have;
+    double price;
 
 
     public static ListView needListView, supplyListView;
@@ -59,7 +60,7 @@ public class Sender extends AsyncTask<Void,Void,String> {
 
 
     public Sender(AppCompatActivity c, String urlAddress, String userID, String type, String item_name, String quan, String unit,
-                  String year, String month, String lati, String longi, String city, String province, int need_have) {
+                  String year, String month, String lati, String longi, String city, String province, int need_have, Double price) {
         this.c = c;
         this.urlAddress = urlAddress;
         this.type = type;
@@ -70,9 +71,10 @@ public class Sender extends AsyncTask<Void,Void,String> {
         this.spinMonth = month;
         this.need_have = need_have;
         this.pd = pd;
+        this.price = price;
 
         need=new Need(userID, type, item_name, quan, unit,
-                year, month, lati, longi, city, province, need_have);
+                year, month, lati, longi, city, province, need_have, price);
 //        need.setName(nameTxt.getText().toString());
 //        need.setPropellant(propellantTxt.getText().toString());
 //        need.setDescription(descTxt.getText().toString());

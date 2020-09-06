@@ -35,6 +35,7 @@ public class DataPackager {
             jo.put("city",need.getCity());
             jo.put("province",need.getProvince());
             jo.put("need_have",need.getNeed_have());
+            jo.put("price", need.getPrice());
        //
             Boolean firstvalue=true;
             Iterator it=jo.keys();

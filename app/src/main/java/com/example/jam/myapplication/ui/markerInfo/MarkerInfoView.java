@@ -8,6 +8,7 @@ public class MarkerInfoView {
     private String displayUser;
     private String displayNumber;
     private String displayEmail;
+    private Double displayPrice;
 
     public MarkerInfoView(
             String displayForType,
@@ -16,7 +17,8 @@ public class MarkerInfoView {
             String displayUnit,
             String displayUser,
             String displayNumber,
-            String displayEmail
+            String displayEmail,
+            Double displayPrice
     ){
         this.displayForType = displayForType;
         this.displayType = displayType;
@@ -25,6 +27,7 @@ public class MarkerInfoView {
         this.displayUser = displayUser;
         this.displayNumber = displayNumber;
         this.displayEmail = displayEmail;
+        this.displayPrice = displayPrice;
     }
 
     public String getDisplayForType(){return displayForType;}
@@ -34,4 +37,5 @@ public class MarkerInfoView {
     public String getDisplayUser(){return displayUser;}
     public String getDisplayNumber(){return displayNumber;}
     public String getDisplayEmail(){return displayEmail;}
+    public Double getDisplayPrice() {return displayPrice;}
 }

@@ -289,91 +289,92 @@ public class MainActivity extends AppCompatActivity
                                 Spinner unit = dialogView.findViewById(R.id.unit);
                                 Spinner year = dialogView.findViewById(R.id.year);
                                 Spinner month = dialogView.findViewById(R.id.month);
+                                EditText price = dialogView.findViewById(R.id.price);
 
                                 if (type.getSelectedItemPosition() != 0 &&
                                         !item.getText().toString().isEmpty() &&
                                         !quan.getText().toString().isEmpty() &&
+                                        !price.getText().toString().isEmpty() &&
                                         year.getSelectedItemPosition() != 0 &&
                                         month.getSelectedItemPosition() != 0
-                                ){
+                                ) {
 
                                     String sUserID = sharedPreferences.getString("id", "");
-                                String sType = type.getSelectedItem().toString();
-                                String sItem_name = item.getText().toString();
-                                String sQuan = quan.getText().toString();
-                                String sUnit = unit.getSelectedItem().toString();
-                                String sYear = year.getSelectedItem().toString();
-                                String sMonth = month.getSelectedItem().toString();
+                                    String sType = type.getSelectedItem().toString();
+                                    String sItem_name = item.getText().toString();
+                                    String sQuan = quan.getText().toString();
+                                    String sUnit = unit.getSelectedItem().toString();
+                                    String sYear = year.getSelectedItem().toString();
+                                    String sMonth = month.getSelectedItem().toString();
+                                    Double sPrice = Double.parseDouble(price.getText().toString());
 
-                                //
-                                String sLati = String.valueOf(location.getLatitude());
-                                String sLongi = String.valueOf(location.getLongitude());
-                                // geocode
-                                String province = null;
-                                String city = null;
-                                //Got the location!
-                                // 0 for need
-                                Geocoder geocoder = new Geocoder(MainActivity.this, Locale.getDefault());
-                                List<Address> addresses = null;
-                                try {
-                                    addresses = geocoder.getFromLocation(
-                                            //10.195131,122.8645368== Binalbagan
-                                            //10.1876625,122.8484584 == chmsc
+                                    //
+                                    String sLati = String.valueOf(location.getLatitude());
+                                    String sLongi = String.valueOf(location.getLongitude());
+                                    // geocode
+                                    String province = null;
+                                    String city = null;
+                                    //Got the location!
+                                    // 0 for need
+                                    Geocoder geocoder = new Geocoder(MainActivity.this, Locale.getDefault());
+                                    List<Address> addresses = null;
+                                    try {
+                                        addresses = geocoder.getFromLocation(
+                                                //10.195131,122.8645368== Binalbagan
+                                                //10.1876625,122.8484584 == chmsc
 //                                            10.1876625,
 //                                            122.8484584, 3); // 3 results for accuracy
-                                            location.getLatitude(),
-                                            location.getLongitude(), 3);// 3 results for accuracy
-                                    // Toast.makeText(MainActivity.this, addresses.get(0).toString(), Toast.LENGTH_LONG).show();
-                                    if (addresses.size() > 0) {
-                                        province = addresses.get(2).getSubAdminArea();
-                                        if (province == null) {//if no sub admin, ex: for Metro Manila
-                                            province = addresses.get(2).getAdminArea();
-                                        }
-                                        if (province == null) {//if no sub admin, ex: for Metro Manila
+                                                location.getLatitude(),
+                                                location.getLongitude(), 3);// 3 results for accuracy
+                                        // Toast.makeText(MainActivity.this, addresses.get(0).toString(), Toast.LENGTH_LONG).show();
+                                        if (addresses.size() > 0) {
+                                            province = addresses.get(2).getSubAdminArea();
+                                            if (province == null) {//if no sub admin, ex: for Metro Manila
+                                                province = addresses.get(2).getAdminArea();
+                                            }
+                                            if (province == null) {//if no sub admin, ex: for Metro Manila
+                                                province = "UNKNOWN";
+                                            }
+                                            city = addresses.get(2).getLocality();
+                                            if (city == null) {
+                                                city = "UNKNOWN";
+                                            }
+
+
+                                            Log.i("geocode province", province);
+                                            Log.i("geocode city", city);
+                                            //Log.i("geocode locality", addresses.get(2).toString());
+                                        } else {
+                                            //TODO UNKNOWN ADDRESS HERE
+                                            city = "UNKNOWN";
                                             province = "UNKNOWN";
                                         }
-                                        city = addresses.get(2).getLocality();
-                                        if (city == null) {
-                                            city = "UNKNOWN";
-                                        }
 
+                                    } catch (IOException ioException) {
+                                        // Catch network or other I/O problems.
 
-                                        Log.i("geocode province", province);
-                                        Log.i("geocode city", city);
-                                        //Log.i("geocode locality", addresses.get(2).toString());
-                                    } else {
-                                        //TODO UNKNOWN ADDRESS HERE
-                                        city = "UNKNOWN";
-                                        province = "UNKNOWN";
+                                        Log.e("GeocodeIOE", ioException.toString(), ioException);
+                                    } catch (IllegalArgumentException illegalArgumentException) {
+
+                                        Log.e("GeocodeIllegalIO", illegalArgumentException.toString() + ". " +
+                                                "Latitude = " + location.getLatitude() +
+                                                ", Longitude = " +
+                                                location.getLongitude(), illegalArgumentException);
                                     }
 
-                                } catch (IOException ioException) {
-                                    // Catch network or other I/O problems.
 
-                                    Log.e("GeocodeIOE", ioException.toString(), ioException);
-                                } catch (IllegalArgumentException illegalArgumentException) {
-
-                                    Log.e("GeocodeIllegalIO", illegalArgumentException.toString() + ". " +
-                                            "Latitude = " + location.getLatitude() +
-                                            ", Longitude = " +
-                                            location.getLongitude(), illegalArgumentException);
-                                }
-
-
-                                // save(sUserID, sItem_name, sDesc, sLati, sLongi, sNeed_have);
-                                Sender s = new Sender(MainActivity.this, insertUrl, sUserID, sType, sItem_name, sQuan, sUnit, sYear, sMonth, sLati,
-                                        sLongi, city, province, needOrHave);
-                                s.execute();
+                                    // save(sUserID, sItem_name, sDesc, sLati, sLongi, sNeed_have);
+                                    Sender s = new Sender(MainActivity.this, insertUrl, sUserID, sType, sItem_name, sQuan, sUnit, sYear, sMonth, sLati,
+                                            sLongi, city, province, needOrHave, sPrice);
+                                    s.execute();
                                     dialog.dismiss();
-                            } else{
-                                    MainActivity.this.runOnUiThread(new Runnable()
-                                    {
-                                        public void run()
-                                        {
+                                } else {
+                                    MainActivity.this.runOnUiThread(new Runnable() {
+                                        public void run() {
                                             Toast.makeText(MainActivity.this, "Save failed, there are unfilled fields", Toast.LENGTH_SHORT).show();
                                         }
                                     });
-                           }
+                                }
 
                             }
                         };
@@ -400,6 +401,7 @@ public class MainActivity extends AppCompatActivity
         AlertDialog alert11 = builder1.create();
         alert11.show();
 
+        dialogView.findViewById(R.id.item).requestFocus();
 
     }
 
@@ -432,12 +434,14 @@ public class MainActivity extends AppCompatActivity
                                 EditText item = dialogView.findViewById(R.id.reportItem);
                                 EditText quan = dialogView.findViewById(R.id.reportQuan);
                                 EditText unit = dialogView.findViewById(R.id.reportUnit);
+                                EditText price = dialogView.findViewById(R.id.price); //fix
 
                                 String sUserID = "jam";
                                 String sType = type.getSelectedItem().toString();
                                 String sItem_name = item.getText().toString();
                                 String sQuan = quan.getText().toString();
                                 String sUnit = unit.getText().toString();
+                                Double sPrice = Double.parseDouble(price.getText().toString()); //fix
 
                                 String sLati = String.valueOf(location.getLatitude());
                                 String sLongi = String.valueOf(location.getLongitude());
@@ -495,7 +499,7 @@ public class MainActivity extends AppCompatActivity
 
                                 // save(sUserID, sItem_name, sDesc, sLati, sLongi, sNeed_have);
                                 Sender s = new Sender(MainActivity.this, insertUrl, sUserID, sType, sItem_name, sQuan, sUnit, "N/A", "N/A", sLati,
-                                        sLongi, city, province, WASTE_FLAG);
+                                        sLongi, city, province, WASTE_FLAG, sPrice); //fix
                                 s.execute();
                             }
                         };
@@ -666,7 +670,7 @@ public class MainActivity extends AppCompatActivity
         startActivity(intent);
     }
 
-    private void goto_aboutUs(){
+    private void goto_aboutUs() {
         Intent intent = new Intent(MainActivity.this, AboutUs.class);
         startActivity(intent);
     }
@@ -931,6 +935,14 @@ public class MainActivity extends AppCompatActivity
         TextView unitView = dialogView.findViewById(R.id.unit);
         unitView.setText(model.getDisplayUnit());
 
+        TextView priceView = dialogView.findViewById(R.id.price);
+
+        if(model.getDisplayPrice() > 0){
+            priceView.setText("Php " + model.getDisplayPrice().toString() + " per kg");
+        }else {
+            priceView.setText("No Price");
+        }
+
         TextView userView = dialogView.findViewById(R.id.user);
         userView.setText(model.getDisplayUser());
 
@@ -953,7 +965,7 @@ public class MainActivity extends AppCompatActivity
                 String call = "tel:" + model.getDisplayNumber();
                 callIntent.setData(Uri.parse(call));
 
-                if (ActivityCompat.checkSelfPermission( context, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
                     // TODO: Consider calling
                     //    ActivityCompat#requestPermissions
                     // here to request the missing permissions, and then overriding
@@ -985,9 +997,9 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        if(model.getDisplayEmail().isEmpty()){
+        if (model.getDisplayEmail().isEmpty()) {
             sendEmailBtn.setVisibility(View.GONE);
-        }else {
+        } else {
             sendEmailBtn.setVisibility(View.VISIBLE);
             sendEmailBtn.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -1019,8 +1031,7 @@ public class MainActivity extends AppCompatActivity
 //    }
 
 
-    public void checkPermission(String permission, int requestCode)
-    {
+    public void checkPermission(String permission, int requestCode) {
 
         // Checking if permission is not granted 
         if (ContextCompat.checkSelfPermission(
@@ -1030,10 +1041,9 @@ public class MainActivity extends AppCompatActivity
             ActivityCompat
                     .requestPermissions(
                             MainActivity.this,
-                            new String[] { permission },
+                            new String[]{permission},
                             requestCode);
-        }
-        else {
+        } else {
             Toast
                     .makeText(MainActivity.this,
                             "Permission already granted",

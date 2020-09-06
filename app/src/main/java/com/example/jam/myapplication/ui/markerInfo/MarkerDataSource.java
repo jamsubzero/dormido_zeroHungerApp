@@ -11,11 +11,12 @@ public class MarkerDataSource {
                                         String unit,
                                         String user,
                                         String number,
-                                        String email
+                                        String email,
+                                        Double price
     ){
         try {
             MarkerData markerData = new MarkerData(
-                    forType, type, quantity, unit, user, number, email);
+                    forType, type, quantity, unit, user, number, email, price);
             return new Result.Success<>(markerData);
         }catch (Exception e) {
             return new Result.Error(new IOException("Error ", e));

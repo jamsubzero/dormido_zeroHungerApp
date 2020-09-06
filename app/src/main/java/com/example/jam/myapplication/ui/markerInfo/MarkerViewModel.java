@@ -66,6 +66,7 @@ public class MarkerViewModel extends ViewModel {
                             String user = dataObj.getString("name");
                             String mobile = dataObj.getString("mobile");
                             String email = dataObj.getString("email");
+                            double price = dataObj.getDouble("price");
 
 //                            MarkerData markerData = new MarkerData(
 //                                    "For Sale",
@@ -92,7 +93,8 @@ public class MarkerViewModel extends ViewModel {
                                     unit,
                                     user,
                                     mobile,
-                                    email
+                                    email,
+                                    price
                             );
 
                             if (result instanceof Result.Success) {
@@ -105,7 +107,8 @@ public class MarkerViewModel extends ViewModel {
                                         data.getUnit(),
                                         data.getUser(),
                                         data.getNumber(),
-                                        data.getEmail()
+                                        data.getEmail(),
+                                        data.getPrice()
 
                                 )));
                             }

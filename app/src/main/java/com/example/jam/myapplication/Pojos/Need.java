@@ -14,9 +14,10 @@ public class Need {
     String city;
     String province;
     int need_have;
+    double price;
 
     public Need(String userID, String type, String item_name, String quan,
-                String unit, String year, String month, String lati, String longi, String city, String province, int need_have) {
+                String unit, String year, String month, String lati, String longi, String city, String province, int need_have, Double price) {
         this.userID = userID;
         this.type = type;
         this.item_name = item_name;
@@ -29,6 +30,7 @@ public class Need {
         this.city = city;
         this.province = province;
         this.need_have = need_have;
+        this.price = price;
     }
 
     public String getUserID() {
@@ -127,5 +129,13 @@ public class Need {
 
     public void setNeed_have(int need_have) {
         this.need_have = need_have;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
     }
 }
