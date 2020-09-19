@@ -70,13 +70,15 @@ public class ForecastFragment extends Fragment {
     Button compareBtn;
 
 
-    String type = "0";
+    String type = "0";  // demand or supply
+    String reportType = "0"; // quantity or price
     String crop = "Rice";
     Integer year = 2020;
 
     Spinner filTypeSpinner;
     Spinner filCropSpinner;
     Spinner filYearSpinner;
+    Spinner forecastReportTypeSpinner;
 
     TextView forecastDetails;
 
@@ -108,6 +110,7 @@ public class ForecastFragment extends Fragment {
         filCropSpinner = getView().findViewById(R.id.filForecastCrop);
         filYearSpinner = getView().findViewById(R.id.filForecastYear);
         forecastDetails = getView().findViewById(R.id.foreCastDetails);
+        forecastReportTypeSpinner = getView().findViewById(R.id.forecastReportType);
 
 
         forecastBtn.setOnClickListener(view1 -> {
@@ -115,9 +118,10 @@ public class ForecastFragment extends Fragment {
              crop = filCropSpinner.getSelectedItem().toString();
              year = Integer.parseInt(filYearSpinner.getSelectedItem().toString());
              type = filTypeSpinner.getSelectedItemPosition()+"";
+             reportType = forecastReportTypeSpinner.getSelectedItemPosition()+"";
 
 
-             new AsyncLogin().execute(type, year+"", "-1", crop, "-1"); // 0 for need, -1 for skip argument
+             new AsyncLogin().execute(type, year+"", "-1", crop, "-1", reportType); // 0 for need, -1 for skip argument
 
 
             }else{
@@ -132,7 +136,7 @@ public class ForecastFragment extends Fragment {
             if (!mealList.isEmpty()){
 
                 String nextYear = String.valueOf(year + 1);
-                new AsyncActualDataProcessor().execute(type, nextYear , "-1", crop, "-1"); // 0 for need, -1 for skip argument
+                new AsyncActualDataProcessor().execute(type, nextYear , "-1", crop, "-1", reportType); // 0 for need, -1 for skip argument
 
             }else {
                 Toast.makeText(ForecastFragment.this.getContext(), "No forecast generated. Please generate forecast first", Toast.LENGTH_SHORT).show();
@@ -271,7 +275,8 @@ public class ForecastFragment extends Fragment {
                         Log.i("JSON 1st ITEM", jsonObject.toString());
 
                         Integer recID = jsonObject.getInt("recID");
-                        String quan = jsonObject.getString("quan");
+                        Double quan = jsonObject.getDouble("quan");
+                        Double price = jsonObject.getDouble("price");
                         String type = jsonObject.getString("type");
                         String unit = jsonObject.getString("unit");
 
@@ -280,12 +285,12 @@ public class ForecastFragment extends Fragment {
                         String year = jsonObject.getString("year");
                         String month = jsonObject.getString("month");
 
+                        Double forecastValue = reportType.equals("0") ? quan : price;
+                        Log.i("price:", "price: " + price);
 
-                        NeedEntry meal = new NeedEntry(recID, type + "(" + quan + " " + unit + ")",
-                                city + ", " + province + ", for: " + month + ", " + year, false);
 
                         NeedReport needReport = new NeedReport(type, monthStringToInt(month),
-                                Integer.parseInt(year), Double.parseDouble(quan));
+                                Integer.parseInt(year), forecastValue);
                         tempReportList.add(needReport);
 
                     }
@@ -356,13 +361,13 @@ public class ForecastFragment extends Fragment {
                     }
 
                     Log.e("ForeCast", "ForCast:");
-                    final String itemName = "Forecast data";
+                    final String itemName = reportType.equals("0") ? "Forecast Quantity" : "Forecast Price";
                     for (int month = 0; month <= 11; month++) {
                         Log.e("ForCast month " + month + ":", forecastedDataPair.get(month) + "");
                         Integer noId = -1;
 
                         NeedEntry meal = new NeedEntry(noId, monthIntToString(month),
-                                df.format(forecastedDataPair.get(month)) + " kg", false);
+                                df.format(forecastedDataPair.get(month)) + (reportType.equals("0") ? " kg" : " php"), false);
                         mealList.add(meal);
 
                         NeedReport needReport = new NeedReport(itemName + "", month,
@@ -376,7 +381,7 @@ public class ForecastFragment extends Fragment {
             }
 
             if(mealList.size() > 0) {
-                forecastDetails.setText(generateReportDetails(year, Integer.parseInt(type), crop));
+                forecastDetails.setText(generateReportDetails(year, Integer.parseInt(type), crop, Integer.parseInt(reportType)));
             } else {
                 forecastDetails.setText(null);
                 Toast.makeText(ForecastFragment.this.getContext(), "Please make sure the actual data for year " + year +" is complete", Toast.LENGTH_LONG).show();
@@ -507,22 +512,19 @@ public class ForecastFragment extends Fragment {
                         JSONObject jsonObject = jsonArray.getJSONObject(index);
                         Log.i("JSON 1st ITEM", jsonObject.toString());
 
-                        Integer recID = jsonObject.getInt("recID");
-                        String quan = jsonObject.getString("quan");
-                        String type = jsonObject.getString("type");
-                        String unit = jsonObject.getString("unit");
 
-                        String city = jsonObject.getString("city");
-                        String province = jsonObject.getString("province");
+                        Double quan = jsonObject.getDouble("quan");
+                        Double price = jsonObject.getDouble("price");
+                        String type = jsonObject.getString("type");
+
                         String year = jsonObject.getString("year");
                         String month = jsonObject.getString("month");
 
-
-                        NeedEntry meal = new NeedEntry(recID,type + "(" + quan + " " + unit + ")",
-                                city + ", " + province + ", for: " + month + ", " + year, false);
+                        Double actualValue = reportType.equals("0") ? quan : price;
+                        Log.i("price:", "price: " + price);
 
                         NeedReport needReport = new NeedReport(type, monthStringToInt(month),
-                                Integer.parseInt(year), Double.parseDouble(quan));
+                                Integer.parseInt(year), actualValue);
                         tempReportList.add(needReport);
 
                     }
@@ -561,7 +563,7 @@ public class ForecastFragment extends Fragment {
 
                 HashMap<Integer, Double> actualDataPair = actualList.get(0);
 
-                final String itemName = "Actual data";
+                final String itemName = reportType.equals("0") ? "Actual Quantity" : "Actual Price";
 
                 for (int month = 0; month <= 11; month++) {
                     Log.e("Actaul DATA", itemName + " " + actualDataPair.get(month));
@@ -579,7 +581,7 @@ public class ForecastFragment extends Fragment {
                 myIntent.putParcelableArrayListExtra(FORECAST_REPORT, reportList);
                 myIntent.putExtra("type", FORECAST_REPORT);
                 String nextYear = String.valueOf(year + 1);
-                myIntent.putExtra("details",  "Forecast and Actual Data for " + (type.equals("0") ? "Demand" : "Supply") + " of " + crop + " for year " + nextYear);
+                myIntent.putExtra("details",  "Forecast and Actual " + (reportType.equals("0") ? "Quantity" : "Price") + " for " + (type.equals("0") ? "Demand" : "Supply") + " of " + crop + " for year " + nextYear);
                 startActivityForResult(myIntent, 1);
             }else{
                 Toast.makeText(ForecastFragment.this.getContext(), "No forecast generated. Please generate forecast first", Toast.LENGTH_SHORT).show();
@@ -691,9 +693,9 @@ public class ForecastFragment extends Fragment {
 
     }
 
-    private String generateReportDetails(int year, int type, String crop){
+    private String generateReportDetails(int year, int type, String crop, int reportType){
         String nextYear = String.valueOf(year + 1);
-        return (type == 0 ? "Demand" : "Supply") + " forecast of "+crop+" for year " + nextYear;
+        return  "Forecast "+(reportType == 0 ? "Quantity" : "Price")+" for " + (type == 0 ? "Demand" : "Supply")+ " of " + crop + " for year " + nextYear;
     }
 
     private boolean isActualDataComplete(HashMap<String, HashMap<Integer, Double>> actualData){

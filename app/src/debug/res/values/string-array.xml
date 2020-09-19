@@ -73,6 +73,11 @@
         <item>Supply</item>
     </string-array>
 
+    <string-array name="forecast_report_type">
+        <item>Quantity</item>
+        <item>Price</item>
+    </string-array>
+
     <string-array name="user_type">
         <item>Select User Type</item>
         <item>Farmer</item>
